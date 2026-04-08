@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CONGB — YouTube Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0a;
+  --surface: #111111;
+  --surface2: #1a1a1a;
+  --border: #222222;
+  --accent: #e63946;
+  --accent2: #ff6b6b;
+  --text: #f0f0f0;
+  --muted: #666;
+  --green: #2ecc71;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+}
+
+/* HEADER */
+header {
+  border-bottom: 1px solid var(--border);
+  padding: 20px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  background: rgba(10,10,10,0.95);
+  backdrop-filter: blur(10px);
+  z-index: 100;
+}
+.logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  letter-spacing: 3px;
+  color: var(--accent);
+}
+.logo span { color: var(--text); }
+.live-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--green);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.live-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: pulse 1.5s infinite;
+}
+@keyframes pulse {
+  0%,100%{opacity:1} 50%{opacity:0.3}
+}
+.last-update {
+  font-size: 12px;
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+}
+
+/* CONTROLS */
+.controls {
+  padding: 20px 32px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--border);
+}
+.ctrl-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  margin-right: 4px;
+}
+.btn-group {
+  display: flex;
+  gap: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px;
+}
+.btn {
+  padding: 6px 14px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all .15s;
+}
+.btn.active {
+  background: var(--accent);
+  color: #fff;
+  font-weight: 500;
+}
+.btn:hover:not(.active) { color: var(--text); background: var(--surface2); }
+
+.divider { width: 1px; height: 28px; background: var(--border); margin: 0 4px; }
+
+/* STATS CARDS */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.stat-card {
+  background: var(--surface);
+  padding: 20px 28px;
+}
+.stat-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.stat-val {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 36px;
+  letter-spacing: 1px;
+  color: var(--text);
+  line-height: 1;
+}
+.stat-sub {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+  font-family: 'DM Mono', monospace;
+}
+
+/* TABLE */
+.table-wrap {
+  overflow-x: auto;
+  padding: 24px 32px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+thead tr {
+  border-bottom: 1px solid var(--border);
+}
+th {
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--muted);
+  font-weight: 400;
+  white-space: nowrap;
+}
+th.time-col {
+  text-align: right;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  min-width: 80px;
+}
+td {
+  padding: 11px 12px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  text-align: right;
+}
+td.name-col {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  color: var(--text);
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+td.rank-col {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  color: var(--muted);
+  text-align: center;
+  width: 40px;
+}
+tr:hover td { background: var(--surface); }
+.val-cell { color: #ccc; }
+.val-latest { color: var(--text); font-weight: 500; }
+.val-empty { color: var(--border); }
+
+/* LOADING */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 32px;
+  gap: 16px;
+}
+.spinner {
+  width: 32px; height: 32px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-txt { color: var(--muted); font-size: 13px; letter-spacing: 1px; }
+
+/* ERROR */
+.error-box {
+  margin: 32px;
+  padding: 20px 24px;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  color: var(--accent2);
+  font-size: 13px;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">CONGB <span>Tracker</span></div>
+  <div class="live-badge"><div class="live-dot"></div> Live</div>
+  <div class="last-update" id="last-update">Đang tải...</div>
+</header>
+
+<div class="controls">
+  <span class="ctrl-label">Xem theo</span>
+  <div class="btn-group" id="mode-group">
+    <button class="btn active" onclick="setMode('hour',this)">Giờ</button>
+    <button class="btn" onclick="setMode('day',this)">Ngày</button>
+  </div>
+  <div class="divider"></div>
+  <span class="ctrl-label">Chỉ số</span>
+  <div class="btn-group" id="metric-group">
+    <button class="btn active" onclick="setMetric('views',this)">Views</button>
+    <button class="btn" onclick="setMetric('likes',this)">Likes</button>
+    <button class="btn" onclick="setMetric('comments',this)">Comments</button>
+  </div>
+</div>
+
+<div class="stats-row" id="stats-row">
+  <div class="stat-card"><div class="stat-label">Tổng views</div><div class="stat-val" id="s-views">—</div><div class="stat-sub">mới nhất</div></div>
+  <div class="stat-card"><div class="stat-label">Tổng likes</div><div class="stat-val" id="s-likes">—</div><div class="stat-sub">mới nhất</div></div>
+  <div class="stat-card"><div class="stat-label">Số video</div><div class="stat-val" id="s-videos">—</div><div class="stat-sub">trong playlist</div></div>
+</div>
+
+<div id="main-content">
+  <div class="loading">
+    <div class="spinner"></div>
+    <div class="loading-txt">Đang tải dữ liệu...</div>
+  </div>
+</div>
+
+<script>
+const API = "https://script.google.com/macros/s/AKfycbzkVClkhBSfHLs35AVvi33jHP4u_PXo-0OPC3HwkzOL8Qqibu97a74MsATTk1C3lEuH/exec";
+
+let allData = [];
+let mode    = "hour";
+let metric  = "views";
+
+function setMode(m, btn) {
+  mode = m;
+  document.querySelectorAll('#mode-group .btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+function setMetric(m, btn) {
+  metric = m;
+  document.querySelectorAll('#metric-group .btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+function fmt(n) {
+  if (!n && n !== 0) return "—";
+  if (n >= 1e6) return (n/1e6).toFixed(2) + "M";
+  if (n >= 1e3) return (n/1e3).toFixed(1) + "K";
+  return n.toLocaleString("vi-VN");
+}
+
+function getTimeKey(row) {
+  return mode === "hour" ? (row.hour || row.date) : row.date;
+}
+
+function getVal(row) {
+  return metric === "views" ? row.views : metric === "likes" ? row.likes : row.comments;
+}
+
+function render() {
+  if (!allData.length) return;
+
+  // Gom nhóm theo video
+  const videoMap = {};
+  allData.forEach(r => {
+    if (!videoMap[r.title]) videoMap[r.title] = {};
+    const t = getTimeKey(r);
+    videoMap[r.title][t] = { views: r.views, likes: r.likes, comments: r.comments };
+  });
+
+  // Danh sách thời gian unique, sort
+  const times = [...new Set(allData.map(r => getTimeKey(r)))].sort();
+  const latestTime = times[times.length - 1];
+
+  // Sort video theo giá trị mới nhất
+  const videos = Object.keys(videoMap).sort((a, b) => {
+    const va = videoMap[a][latestTime]?.[metric] || 0;
+    const vb = videoMap[b][latestTime]?.[metric] || 0;
+    return vb - va;
+  });
+
+  // Summary cards
+  let totalViews = 0, totalLikes = 0;
+  videos.forEach(v => {
+    const cell = videoMap[v][latestTime];
+    if (cell) { totalViews += cell.views || 0; totalLikes += cell.likes || 0; }
+  });
+  document.getElementById('s-views').textContent   = fmt(totalViews);
+  document.getElementById('s-likes').textContent   = fmt(totalLikes);
+  document.getElementById('s-videos').textContent  = videos.length;
+
+  // Build table
+  const colLabel = metric === "views" ? "Views" : metric === "likes" ? "Likes" : "Comments";
+  let html = `<div class="table-wrap"><table><thead><tr>
+    <th style="width:40px;text-align:center">#</th>
+    <th>Tên video</th>`;
+  times.forEach(t => {
+    const label = mode === "hour" ? t.split(" ")[1] + "<br><span style='color:#444;font-size:10px'>" + t.split(" ")[0] + "</span>"
+                                  : t;
+    const isLatest = t === latestTime;
+    html += `<th class="time-col" style="${isLatest ? 'color:var(--accent2)' : ''}">${label}</th>`;
+  });
+  html += `</tr></thead><tbody>`;
+
+  videos.forEach((v, i) => {
+    const shortName = v.replace(/CONGB\s*/i, "").replace(/\|.*/, "").trim();
+    html += `<tr>
+      <td class="rank-col">${i+1}</td>
+      <td class="name-col" title="${v}">${shortName}</td>`;
+    times.forEach(t => {
+      const cell  = videoMap[v][t];
+      const val   = cell ? cell[metric] : null;
+      const isLatest = t === latestTime;
+      if (val === null || val === undefined) {
+        html += `<td class="val-empty">—</td>`;
+      } else {
+        html += `<td class="${isLatest ? 'val-latest' : 'val-cell'}">${fmt(val)}</td>`;
+      }
+    });
+    html += `</tr>`;
+  });
+
+  html += `</tbody></table></div>`;
+  document.getElementById('main-content').innerHTML = html;
+}
+
+async function loadData() {
+  try {
+    const res  = await fetch(API);
+    const json = await res.json();
+    allData    = json.data || [];
+
+    const now = new Date();
+    document.getElementById('last-update').textContent =
+      "Cập nhật: " + now.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
+
+    render();
+  } catch(e) {
+    document.getElementById('main-content').innerHTML =
+      `<div class="error-box">Không tải được dữ liệu. Kiểm tra lại API URL hoặc quyền truy cập.<br><small>${e.message}</small></div>`;
+  }
+}
+
+loadData();
+setInterval(loadData, 60 * 60 * 1000); // tự reload mỗi giờ
+</script>
+</body>
+</html>
