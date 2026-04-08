@@ -306,19 +306,22 @@ function renderSpotify(){
 }
 
 async function fetchWithFallback(){
-  const bust = "?t=" + Date.now();
-  const proxies=[
-    `https://api.allorigins.win/get?url=${encodeURIComponent(SCRIPT_URL+bust)}`,
-    `https://corsproxy.io/?${encodeURIComponent(SCRIPT_URL+bust)}`,
-  ];
-  try{const res=await fetch(SCRIPT_URL+bust);return await res.json();}catch(e){}
-  for(const proxy of proxies){
-    try{
-      const res=await fetch(proxy);const j=await res.json();
-      if(j.contents)return JSON.parse(j.contents);
-      if(j.youtube)return j;
-    }catch(e){}
-  }
+  const bust = "&t=" + Date.now();
+  // corsproxy trả thẳng JSON, không cache
+  try {
+    const res = await fetch("https://corsproxy.io/?" + encodeURIComponent(SCRIPT_URL + bust));
+    const j   = await res.json();
+    if (j.youtube) return j;
+    if (j.contents) return JSON.parse(j.contents);
+  } catch(e) {}
+  // fallback allorigins
+  try {
+    const res = await fetch("https://api.allorigins.win/get?url=" + encodeURIComponent(SCRIPT_URL + bust));
+    const j   = await res.json();
+    if (j.contents) return JSON.parse(j.contents);
+  } catch(e) {}
+  // thử thẳng
+  try { return await (await fetch(SCRIPT_URL)).json(); } catch(e) {}
   throw new Error("Không kết nối được API");
 }
 
