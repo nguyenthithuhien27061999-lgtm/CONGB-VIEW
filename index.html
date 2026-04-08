@@ -112,8 +112,8 @@ tr:hover td{background:var(--surface2)}
     </div>
   </div>
   <div class="stats-row" style="grid-template-columns:repeat(4,minmax(0,1fr))">
-    <div class="stat-card"><div class="stat-label">Followers hiện tại</div><div class="stat-val" id="sp-followers" style="color:var(--spotify)">—</div><div class="stat-sub">mới nhất</div></div>
-    <div class="stat-card"><div class="stat-label">Tăng / ngày</div><div class="stat-val" id="sp-delta">—</div><div class="stat-sub">so với hôm qua</div></div>
+    <div class="stat-card"><div class="stat-label">Popularity trung bình</div><div class="stat-val" id="sp-followers" style="color:var(--spotify)">—</div><div class="stat-sub">tất cả bài</div></div>
+    <div class="stat-card"><div class="stat-label">Bài hot nhất +/-</div><div class="stat-val" id="sp-delta">—</div><div class="stat-sub">so với trước</div></div>
     <div class="stat-card"><div class="stat-label">Số bài theo dõi</div><div class="stat-val" id="sp-tracks">—</div><div class="stat-sub">top tracks</div></div>
     <div class="stat-card"><div class="stat-label">Bài phổ biến nhất</div><div id="sp-top-track" style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;line-height:1.5;margin:6px 0 4px;color:var(--text)">—</div><div class="stat-sub" id="sp-top-track-sub">—</div></div>
   </div>
@@ -253,86 +253,72 @@ function renderYouTube(){
 
 function renderSpotify(){
   if(!spData.length){document.getElementById('sp-content').innerHTML='<div class="loading"><div class="loading-txt">Chưa có data Spotify</div></div>';return;}
-  const artists=spData.filter(r=>r.type==="artist");
-  const tracks=spData.filter(r=>r.type==="track");
 
-  const followersByHour={};
-  artists.forEach(r=>{if(r.hour) followersByHour[r.hour]=r.value; else followersByHour[r.date+" 00:00"]=r.value;});
-  const followersByDate={};
-  artists.forEach(r=>{followersByDate[r.date]=r.value;});
-  const followersByMonth={};
-  artists.forEach(r=>{
-    const p=r.date.split("/");const month=p[1]+"/"+p[2];
-    if(!followersByMonth[month]) followersByMonth[month]=r.value;
-    else followersByMonth[month]=Math.max(followersByMonth[month],r.value);
+  // Gom popularity theo bài + thời gian
+  const trackNames=[...new Set(spData.map(r=>r.name))];
+
+  // Build time keys
+  const getSpTimeKey = r => spMode==='hour'?(r.hour||r.date):spMode==='day'?r.date:(()=>{const p=r.date.split("/");return p[1]+"/"+p[2];})();
+  const allTimes=[...new Set(spData.map(r=>getSpTimeKey(r)))].sort();
+  const times=spMode==='hour'?allTimes.slice(-24):allTimes.slice(-7);
+  const latest=times[times.length-1];
+
+  // Build map: name||time -> popularity
+  const popMap={};
+  spData.forEach(r=>{
+    const t=getSpTimeKey(r);
+    const key=r.name+"||"+t;
+    if(!popMap[key]||r.popularity>popMap[key]) popMap[key]=r.popularity;
   });
 
-  const allHours=Object.keys(followersByHour).sort();
-  const allDates=Object.keys(followersByDate).sort();
-  let dates,valMap;
-  if(spMode==="hour"){dates=allHours.slice(-24);valMap=followersByHour;}
-  else if(spMode==="day"){dates=allDates.slice(-7);valMap=followersByDate;}
-  else{dates=Object.keys(followersByMonth).sort().slice(-7);valMap=followersByMonth;}
-  const latestDate=allDates[allDates.length-1];
-  const latestKey=spMode==='hour'?allHours[allHours.length-1]:latestDate;
-  const latestFollowers=spMode==='hour'?(followersByHour[latestKey]||0):(followersByDate[latestDate]||0);
-  const latestTracks=tracks.filter(r=>r.date===latestDate);
+  // Latest popularity per track
+  const latestPops=trackNames.map(n=>({name:n,pop:popMap[n+"||"+latest]||0,album:spData.find(r=>r.name===n)?.album||"",duration:spData.find(r=>r.name===n)?.duration||0}));
+  latestPops.sort((a,b)=>b.pop-a.pop);
 
-  // Delta followers
+  const topTrack=latestPops[0];
+  const avgPop=latestPops.length?Math.round(latestPops.reduce((s,t)=>s+t.pop,0)/latestPops.length):0;
+
+  // Delta top track
   let delta="—";
-  if(allDates.length>=2){
-    const d1=allDates[allDates.length-1];
-    const d0=allDates[allDates.length-2];
-    const diff=(followersByDate[d1]||0)-(followersByDate[d0]||0);
-    delta=diff>=0?`<span class="up">+${fmtFull(diff)}</span>`:`<span class="dn">${fmtFull(diff)}</span>`;
+  if(times.length>=2){
+    const prev=times[times.length-2];
+    const d1=popMap[topTrack?.name+"||"+latest]||0;
+    const d0=popMap[topTrack?.name+"||"+prev]||0;
+    const diff=d1-d0;
+    delta=diff>0?`<span class="up">+${diff}</span>`:diff<0?`<span class="dn">${diff}</span>`:"—";
   }
 
-  document.getElementById('sp-followers').textContent=fmt(latestFollowers);
+  document.getElementById('sp-followers').textContent=avgPop+"/100";
   document.getElementById('sp-delta').innerHTML=delta;
-  document.getElementById('sp-tracks').textContent=latestTracks.length;
-
-  // Bài phổ biến nhất
-  if(latestTracks.length){
-    const top=latestTracks.reduce((a,b)=>(a.value||0)>(b.value||0)?a:b);
-    document.getElementById('sp-top-track').textContent=top.name;
-    document.getElementById('sp-top-track-sub').textContent='Duration: '+fmtDur(top.duration);
+  document.getElementById('sp-tracks').textContent=trackNames.length;
+  if(topTrack){
+    document.getElementById('sp-top-track').textContent=topTrack.name;
+    document.getElementById('sp-top-track-sub').textContent='Popularity: '+topTrack.pop+'/100';
   }
 
-  let html=`<div class="table-wrap">`;
-
-  // Followers trend table
-  html+=`<table style="margin-bottom:24px"><thead><tr><th>Chỉ số</th>`;
-  dates.forEach(d=>{html+=`<th class="r" style="${d===dates[dates.length-1]?'color:var(--spotify)':''}">${d}</th>`;});
-  html+=`<th class="r" style="color:var(--up)">+/-</th></tr></thead><tbody><tr><td class="name-col">Followers</td>`;
-  dates.forEach(d=>{
-    const isL=d===dates[dates.length-1];
-    html+=`<td class="r ${isL?'val-latest':'val-cell'}">${fmtFull(valMap[d])}</td>`;
+  let html=`<div class="table-wrap"><table><thead><tr>
+    <th style="width:40px;text-align:center">#</th><th>Tên bài</th>`;
+  times.forEach(t=>{
+    const isL=t===latest;
+    const label=spMode==='hour'?t.split(" ")[1]+"<br><span style='color:#b8cfe0;font-size:10px'>"+t.split(" ")[0]+"</span>":t;
+    html+=`<th class="r" style="${isL?'color:var(--spotify)':''}">${label}</th>`;
   });
-  // +/- followers
-  const fFirst=Number(valMap[dates[0]])||0;
-  const fLast=Number(valMap[dates[dates.length-1]])||0;
-  html+=`<td class="r">${fmtDiff(fLast-fFirst)}</td>`;
-  html+=`</tr></tbody></table>`;
+  html+=`<th class="r" style="color:var(--up)">+/-</th><th class="r">Duration</th></tr></thead><tbody>`;
 
-  // Top tracks table
-  if(latestTracks.length){
-    html+=`<table><thead><tr>
-      <th style="width:40px;text-align:center">#</th>
-      <th>Tên bài</th>
-      <th class="r">Album</th>
-      <th class="r">Duration</th>
-    </tr></thead><tbody>`;
-    latestTracks.sort((a,b)=>(b.value||0)-(a.value||0)).forEach((t,i)=>{
-      html+=`<tr>
-        <td class="rank-col">${i+1}</td>
-        <td class="name-col">${t.name}</td>
-        <td class="r val-cell" style="max-width:160px;overflow:hidden;text-overflow:ellipsis">${t.album||"—"}</td>
-        <td class="r val-latest">${fmtDur(t.duration)}</td>
-      </tr>`;
+  latestPops.forEach((t,i)=>{
+    html+=`<tr><td class="rank-col">${i+1}</td><td class="name-col">${t.name}</td>`;
+    times.forEach(tk=>{
+      const val=popMap[t.name+"||"+tk];
+      const isL=tk===latest;
+      html+=val===undefined?`<td class="r val-empty">—</td>`:`<td class="r ${isL?'val-latest':'val-cell'}">${val}</td>`;
     });
-    html+=`</tbody></table>`;
-  }
-  html+=`</div>`;
+    const v1=popMap[t.name+"||"+times[times.length-1]]||0;
+    const v0=popMap[t.name+"||"+times[0]]||0;
+    html+=`<td class="r">${fmtDiff(v1-v0)}</td>`;
+    html+=`<td class="r val-cell">${fmtDur(t.duration)}</td>`;
+    html+=`</tr>`;
+  });
+  html+=`</tbody></table></div>`;
   document.getElementById('sp-content').innerHTML=html;
 }
 
