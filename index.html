@@ -92,10 +92,11 @@ tr:hover td{background:var(--surface2)}
       <button class="btn" onclick="setMetric('comments',this)">Comments</button>
     </div>
   </div>
-  <div class="stats-row" id="yt-stats" style="grid-template-columns:repeat(3,minmax(0,1fr))">
+  <div class="stats-row" id="yt-stats" style="grid-template-columns:repeat(4,minmax(0,1fr))">
     <div class="stat-card"><div class="stat-label" id="sl-main">Tổng views</div><div class="stat-val" id="s-main">—</div><div class="stat-sub">mới nhất</div></div>
     <div class="stat-card"><div class="stat-label" id="sl-avg-h">TB tăng / giờ</div><div class="stat-val" id="s-avg-h">—</div><div class="stat-sub">so với giờ trước</div></div>
     <div class="stat-card"><div class="stat-label" id="sl-peak">Giờ tăng cao nhất</div><div class="stat-val" id="s-peak" style="font-size:18px;padding-top:6px">—</div><div class="stat-sub" id="s-peak-sub">—</div></div>
+    <div class="stat-card"><div class="stat-label" id="sl-top-video">Bài tăng cao nhất</div><div class="stat-val" id="s-top-video" style="font-size:14px;line-height:1.4;padding-top:4px">—</div><div class="stat-sub" id="s-top-video-sub">—</div></div>
   </div>
   <div id="yt-content"><div class="loading"><div class="spinner"></div><div class="loading-txt">Đang tải...</div></div></div>
 </div>
@@ -109,10 +110,11 @@ tr:hover td{background:var(--surface2)}
       <button class="btn sp-btn" onclick="setSpMode('month',this)">Tháng</button>
     </div>
   </div>
-  <div class="stats-row" style="grid-template-columns:repeat(3,minmax(0,1fr))">
+  <div class="stats-row" style="grid-template-columns:repeat(4,minmax(0,1fr))">
     <div class="stat-card"><div class="stat-label">Followers hiện tại</div><div class="stat-val" id="sp-followers" style="color:var(--spotify)">—</div><div class="stat-sub">mới nhất</div></div>
     <div class="stat-card"><div class="stat-label">Tăng / ngày</div><div class="stat-val" id="sp-delta">—</div><div class="stat-sub">so với hôm qua</div></div>
     <div class="stat-card"><div class="stat-label">Số bài theo dõi</div><div class="stat-val" id="sp-tracks">—</div><div class="stat-sub">top tracks</div></div>
+    <div class="stat-card"><div class="stat-label">Bài phổ biến nhất</div><div class="stat-val" id="sp-top-track" style="font-size:14px;line-height:1.4;padding-top:4px">—</div><div class="stat-sub" id="sp-top-track-sub">—</div></div>
   </div>
   <div id="sp-content"><div class="loading"><div class="spinner"></div><div class="loading-txt">Đang tải...</div></div></div>
 </div>
@@ -202,6 +204,22 @@ function renderYouTube(){
     }
   }
 
+  // Bài tăng cao nhất
+  if(times.length>=2){
+    const prev=times[times.length-2];
+    let topVideo="",topDiff=0;
+    videos.forEach(v=>{
+      const diff=(videoMap[v][latest]?.[metricKey]||0)-(videoMap[v][prev]?.[metricKey]||0);
+      if(diff>topDiff){topDiff=diff;topVideo=v;}
+    });
+    if(topVideo){
+      const short=topVideo.replace(/CONGB\s*/i,"").replace(/\|.*/,"").trim();
+      document.getElementById('s-top-video').textContent=short;
+      document.getElementById('s-top-video-sub').innerHTML=`<span class="up">+${fmt(topDiff)}</span> ${metricKey}`;
+      document.getElementById('sl-top-video').textContent='Bài tăng cao nhất';
+    }
+  }
+
   // Table
   let html=`<div class="table-wrap"><table><thead><tr>
     <th style="width:40px;text-align:center">#</th><th>Tên video</th>`;
@@ -265,6 +283,13 @@ function renderSpotify(){
   document.getElementById('sp-followers').textContent=fmt(latestFollowers);
   document.getElementById('sp-delta').innerHTML=delta;
   document.getElementById('sp-tracks').textContent=latestTracks.length;
+
+  // Bài phổ biến nhất
+  if(latestTracks.length){
+    const top=latestTracks.reduce((a,b)=>(a.value||0)>(b.value||0)?a:b);
+    document.getElementById('sp-top-track').textContent=top.name;
+    document.getElementById('sp-top-track-sub').textContent='Duration: '+fmtDur(top.duration);
+  }
 
   let html=`<div class="table-wrap">`;
 
