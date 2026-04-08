@@ -172,6 +172,7 @@ function setSpMode(m, btn) {
   renderSpotify();
 }
 
+function fmtDur(ms) { if(!ms) return "—"; const m=Math.floor(ms/60000); const s=Math.floor((ms%60000)/1000); return m+":"+String(s).padStart(2,"0"); }
 function fmt(n) { if (!n && n!==0) return "—"; if(n>=1e6) return (n/1e6).toFixed(2)+"M"; if(n>=1e3) return (n/1e3).toFixed(1)+"K"; return n.toLocaleString("vi-VN"); }
 function fmtFull(n) { if(n===null||n===undefined) return "—"; return Number(n).toLocaleString("vi-VN"); }
 
@@ -261,9 +262,9 @@ function renderSpotify() {
 
   // Top tracks
   if (latestTracks.length) {
-    html += `<table><thead><tr><th style="width:40px;text-align:center">#</th><th>Tên bài</th><th class="r">Album</th><th class="r">Popularity</th></tr></thead><tbody>`;
+    html += `<table><thead><tr><th style="width:40px;text-align:center">#</th><th>Tên bài</th><th class="r">Album</th><th class="r">Duration</th></tr></thead><tbody>`;
     latestTracks.sort((a,b) => (b.value||0)-(a.value||0)).forEach((t,i) => {
-      html += `<tr><td class="rank-col">${i+1}</td><td class="name-col">${t.name}</td><td class="r val-cell" style="max-width:160px;overflow:hidden;text-overflow:ellipsis">${t.album||"—"}</td><td class="r val-latest">${t.value||0}</td></tr>`;
+      html += `<tr><td class="rank-col">${i+1}</td><td class="name-col">${t.name}</td><td class="r val-cell" style="max-width:160px;overflow:hidden;text-overflow:ellipsis">${t.album||"—"}</td><td class="r val-latest">${fmtDur(t.duration)}</td></tr>`;
     });
     html += `</tbody></table>`;
   }
