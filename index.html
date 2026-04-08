@@ -191,7 +191,8 @@ function renderYouTube(){
     <th style="width:40px;text-align:center">#</th><th>Tên video</th>`;
   times.forEach(t=>{
     const isL=t===latest;
-    const label=mode==="hour"?t.split(" ")[1]+"<br><span style='color:#b8cfe0;font-size:10px'>"+t.split(" ")[0]+"</span>":t;
+    const timeParts=t.split(" ");
+    const label=mode==="hour"?(timeParts[1]||t)+"<br><span style='color:#b8cfe0;font-size:10px'>"+(timeParts[0]||"")+"</span>":t;
     html+=`<th class="r" style="${isL?'color:var(--accent2)':''}">${label}</th>`;
   });
   html+=`<th class="r" style="color:var(--up)">+/-</th></tr></thead><tbody>`;
