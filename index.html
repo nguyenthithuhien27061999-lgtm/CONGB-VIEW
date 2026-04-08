@@ -110,10 +110,13 @@ tr:hover td { background: var(--surface2); }
       <button class="btn" onclick="setMetric('comments',this)">Comments</button>
     </div>
   </div>
-  <div class="stats-row">
+  <div class="stats-row" style="grid-template-columns:repeat(6,minmax(0,1fr))">
     <div class="stat-card"><div class="stat-label">Tổng views</div><div class="stat-val" id="s-views">—</div><div class="stat-sub">mới nhất</div></div>
     <div class="stat-card"><div class="stat-label">Tổng likes</div><div class="stat-val" id="s-likes">—</div><div class="stat-sub">mới nhất</div></div>
     <div class="stat-card"><div class="stat-label">Số video</div><div class="stat-val" id="s-videos">—</div><div class="stat-sub">trong playlist</div></div>
+    <div class="stat-card"><div class="stat-label">TB tăng / giờ</div><div class="stat-val" id="s-per-hour">—</div><div class="stat-sub">trung bình</div></div>
+    <div class="stat-card"><div class="stat-label">TB tăng / ngày</div><div class="stat-val" id="s-per-day">—</div><div class="stat-sub">trung bình</div></div>
+    <div class="stat-card"><div class="stat-label">Giờ tăng cao nhất</div><div class="stat-val" id="s-peak" style="font-size:18px;padding-top:6px">—</div><div class="stat-sub" id="s-peak-val">—</div></div>
   </div>
   <div id="yt-content"><div class="loading"><div class="spinner"></div><div class="loading-txt">Đang tải...</div></div></div>
 </div>
@@ -186,7 +189,8 @@ function renderYouTube() {
     const t = getYTTimeKey(r);
     videoMap[r.title][t] = { views: r.views, likes: r.likes, comments: r.comments };
   });
-  const times = [...new Set(ytData.map(r => getYTTimeKey(r)))].sort();
+  const allTimes = [...new Set(ytData.map(r => getYTTimeKey(r)))].sort();
+  const times = allTimes.slice(-3);
   const latest = times[times.length - 1];
   const videos = Object.keys(videoMap).sort((a,b) => (videoMap[b][latest]?.views||0)-(videoMap[a][latest]?.views||0));
 
@@ -195,6 +199,65 @@ function renderYouTube() {
   document.getElementById('s-views').textContent = fmt(tv);
   document.getElementById('s-likes').textContent = fmt(tl);
   document.getElementById('s-videos').textContent = videos.length;
+
+  // TB tăng / giờ
+  if (times.length >= 2) {
+    const prev = times[times.length - 2];
+    let diffH = 0;
+    videos.forEach(v => {
+      const c1 = videoMap[v][latest]?.views || 0;
+      const c0 = videoMap[v][prev]?.views || 0;
+      diffH += c1 - c0;
+    });
+    document.getElementById('s-per-hour').textContent = "+" + fmt(Math.round(diffH));
+  }
+
+  // TB tăng / ngày — lấy tất cả data theo ngày
+  const dayMap = {};
+  ytData.forEach(r => {
+    const d = r.date;
+    if (!dayMap[d]) dayMap[d] = 0;
+    const t = getYTTimeKey(r);
+    if (t === latest || mode === 'day') {
+      videos.forEach(v => { if (r.title === v) dayMap[d] += 0; });
+    }
+  });
+  // Tính tổng views theo ngày
+  const dayTotals = {};
+  ytData.forEach(r => {
+    if (!dayTotals[r.date]) dayTotals[r.date] = {};
+    if (!dayTotals[r.date][r.title] || r.hour >= (dayTotals[r.date][r.title].hour||"")) {
+      dayTotals[r.date][r.title] = { views: r.views, hour: r.hour };
+    }
+  });
+  const dayDates = Object.keys(dayTotals).sort();
+  if (dayDates.length >= 2) {
+    const d1 = dayDates[dayDates.length - 1];
+    const d0 = dayDates[dayDates.length - 2];
+    let diffD = 0;
+    videos.forEach(v => {
+      const v1 = dayTotals[d1]?.[v]?.views || 0;
+      const v0 = dayTotals[d0]?.[v]?.views || 0;
+      diffD += v1 - v0;
+    });
+    document.getElementById('s-per-day').textContent = "+" + fmt(Math.round(diffD));
+  }
+
+  // Giờ tăng cao nhất
+  if (times.length >= 2) {
+    let peakTime = "", peakDiff = 0;
+    for (let i = 1; i < times.length; i++) {
+      let diff = 0;
+      videos.forEach(v => {
+        diff += (videoMap[v][times[i]]?.views||0) - (videoMap[v][times[i-1]]?.views||0);
+      });
+      if (diff > peakDiff) { peakDiff = diff; peakTime = times[i]; }
+    }
+    if (peakTime) {
+      document.getElementById('s-peak').textContent = mode==='hour' ? peakTime.split(" ")[1] : peakTime;
+      document.getElementById('s-peak-val').textContent = "+" + fmt(peakDiff) + " views";
+    }
+  }
 
   let html = `<div class="table-wrap"><table><thead><tr><th style="width:40px;text-align:center">#</th><th>Tên video</th>`;
   times.forEach(t => {
@@ -237,8 +300,8 @@ function renderSpotify() {
   });
 
   const dates = spMode === "day"
-    ? Object.keys(followersByDate).sort()
-    : Object.keys(followersByMonth).sort();
+    ? Object.keys(followersByDate).sort().slice(-7)
+    : Object.keys(followersByMonth).sort().slice(-7);
   const valMap = spMode === "day" ? followersByDate : followersByMonth;
 
   const latestDate = Object.keys(followersByDate).sort().pop();
