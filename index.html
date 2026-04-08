@@ -307,20 +307,22 @@ function renderSpotify(){
 
 async function fetchWithFallback(){
   const bust = "&t=" + Date.now();
-  // corsproxy trả thẳng JSON, không cache
-  try {
-    const res = await fetch("https://corsproxy.io/?" + encodeURIComponent(SCRIPT_URL + bust));
-    const j   = await res.json();
-    if (j.youtube) return j;
-    if (j.contents) return JSON.parse(j.contents);
-  } catch(e) {}
-  // fallback allorigins
-  try {
-    const res = await fetch("https://api.allorigins.win/get?url=" + encodeURIComponent(SCRIPT_URL + bust));
-    const j   = await res.json();
-    if (j.contents) return JSON.parse(j.contents);
-  } catch(e) {}
-  // thử thẳng
+  const proxies = [
+    u => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}`,
+    u => `https://thingproxy.freeboard.io/fetch/${u}`,
+    u => `https://api.codetabs.com/v1/proxy?quest=${u}`,
+  ];
+  for (const mkProxy of proxies) {
+    try {
+      const res = await fetch(mkProxy(SCRIPT_URL + bust));
+      const txt = await res.text();
+      let j;
+      try { j = JSON.parse(txt); } catch(e) { continue; }
+      if (j.contents) { try { return JSON.parse(j.contents); } catch(e) { continue; } }
+      if (j.youtube) return j;
+      if (Array.isArray(j) || j.data) return j;
+    } catch(e) {}
+  }
   try { return await (await fetch(SCRIPT_URL)).json(); } catch(e) {}
   throw new Error("Không kết nối được API");
 }
