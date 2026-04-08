@@ -209,7 +209,11 @@ function renderYouTube(){
     const first=times[0],last=times[times.length-1];
     const v1=videoMap[v][last]?.[metricKey]||0;
     const v0=videoMap[v][first]?.[metricKey]||0;
-    html+=`<td class="r">${fmtDiff(v1-v0)}</td>`;
+    const tLast2=times[times.length-1];
+    const tPrev2=times[times.length-2];
+    const vL=videoMap[v][tLast2]?.[metricKey]??null;
+    const vP=videoMap[v][tPrev2]?.[metricKey]??null;
+    html+=`<td class="r">${(vL!==null&&vP!==null)?fmtDiff(vL-vP):"—"}</td>`;
     html+=`</tr>`;
   });
   html+=`</tbody></table></div>`;
