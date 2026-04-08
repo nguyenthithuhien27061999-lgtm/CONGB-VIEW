@@ -132,7 +132,7 @@ function renderYouTube(){
       videoMap[r.title][t]={views:r.views,likes:r.likes,comments:r.comments,hour:r.hour||""};
   });
   const allTimes=[...new Set(ytData.map(r=>getYTTimeKey(r)))].sort();
-  const times=mode==='day'?allTimes.slice(-7):allTimes.slice(-24);
+  const times=mode==='day'?allTimes.slice(-10):allTimes.slice(-24);
   const latest=times[times.length-1];
   const videos=Object.keys(videoMap).sort((a,b)=>(videoMap[b][latest]?.views||0)-(videoMap[a][latest]?.views||0));
 
