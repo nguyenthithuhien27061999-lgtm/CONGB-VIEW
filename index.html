@@ -106,16 +106,14 @@ tr:hover td{background:var(--surface2)}
   <div class="controls">
     <span class="ctrl-label">Xem theo</span>
     <div class="btn-group" id="grp-sp-mode">
-      <button class="btn sp-btn" onclick="setSpMode('hour',this)">Giờ</button>
       <button class="btn active sp-btn" onclick="setSpMode('day',this)">Ngày</button>
       <button class="btn sp-btn" onclick="setSpMode('month',this)">Tháng</button>
     </div>
   </div>
-  <div class="stats-row" style="grid-template-columns:repeat(4,minmax(0,1fr))">
-    <div class="stat-card"><div class="stat-label">Popularity trung bình</div><div class="stat-val" id="sp-followers" style="color:var(--spotify)">—</div><div class="stat-sub">tất cả bài</div></div>
-    <div class="stat-card"><div class="stat-label">Bài hot nhất +/-</div><div class="stat-val" id="sp-delta">—</div><div class="stat-sub">so với trước</div></div>
-    <div class="stat-card"><div class="stat-label">Số bài theo dõi</div><div class="stat-val" id="sp-tracks">—</div><div class="stat-sub">top tracks</div></div>
-    <div class="stat-card"><div class="stat-label">Bài phổ biến nhất</div><div id="sp-top-track" style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;line-height:1.5;margin:6px 0 4px;color:var(--text)">—</div><div class="stat-sub" id="sp-top-track-sub">—</div></div>
+  <div class="stats-row" style="grid-template-columns:repeat(3,minmax(0,1fr))">
+    <div class="stat-card"><div class="stat-label">Số bài theo dõi</div><div class="stat-val" id="sp-tracks" style="color:var(--spotify)">—</div><div class="stat-sub">trong playlist</div></div>
+    <div class="stat-card"><div class="stat-label">Bài mới nhất</div><div id="sp-top-track" style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;line-height:1.5;margin:6px 0 4px;color:var(--text)">—</div><div class="stat-sub" id="sp-top-track-sub">—</div></div>
+    <div class="stat-card"><div class="stat-label">Cập nhật</div><div class="stat-val" id="sp-date" style="font-size:18px;padding-top:6px">—</div><div class="stat-sub">lần gần nhất</div></div>
   </div>
   <div id="sp-content"><div class="loading"><div class="spinner"></div><div class="loading-txt">Đang tải...</div></div></div>
 </div>
@@ -254,68 +252,53 @@ function renderYouTube(){
 function renderSpotify(){
   if(!spData.length){document.getElementById('sp-content').innerHTML='<div class="loading"><div class="loading-txt">Chưa có data Spotify</div></div>';return;}
 
-  // Gom popularity theo bài + thời gian
   const trackNames=[...new Set(spData.map(r=>r.name))];
+  const allDates=[...new Set(spData.map(r=>r.date))].sort();
+  const getKey=r=>spMode==='day'?r.date:(()=>{const p=r.date.split("/");return p[1]+"/"+p[2];})();
+  const allKeys=[...new Set(spData.map(r=>getKey(r)))].sort();
+  const keys=allKeys.slice(-7);
+  const latest=keys[keys.length-1];
+  const latestDate=allDates[allDates.length-1];
 
-  // Build time keys
-  const getSpTimeKey = r => spMode==='hour'?(r.hour||r.date):spMode==='day'?r.date:(()=>{const p=r.date.split("/");return p[1]+"/"+p[2];})();
-  const allTimes=[...new Set(spData.map(r=>getSpTimeKey(r)))].sort();
-  const times=spMode==='hour'?allTimes.slice(-24):allTimes.slice(-7);
-  const latest=times[times.length-1];
+  // Latest tracks
+  const latestTracks=spData.filter(r=>r.date===latestDate);
+  const trackSet=new Map();
+  latestTracks.forEach(r=>{if(!trackSet.has(r.name)) trackSet.set(r.name,r);});
+  const uniqueTracks=[...trackSet.values()];
 
-  // Build map: name||time -> popularity
-  const popMap={};
+  document.getElementById('sp-tracks').textContent=uniqueTracks.length;
+  document.getElementById('sp-date').textContent=latestDate||"—";
+  if(uniqueTracks.length){
+    document.getElementById('sp-top-track').textContent=uniqueTracks[0].name;
+    document.getElementById('sp-top-track-sub').textContent=uniqueTracks[0].album||"—";
+  }
+
+  // Danh sách bài mới theo ngày
+  const trackByDate={};
   spData.forEach(r=>{
-    const t=getSpTimeKey(r);
-    const key=r.name+"||"+t;
-    if(!popMap[key]||r.popularity>popMap[key]) popMap[key]=r.popularity;
+    const k=getKey(r);
+    if(!trackByDate[k]) trackByDate[k]=new Set();
+    trackByDate[k].add(r.name);
   });
-
-  // Latest popularity per track
-  const latestPops=trackNames.map(n=>({name:n,pop:popMap[n+"||"+latest]||0,album:spData.find(r=>r.name===n)?.album||"",duration:spData.find(r=>r.name===n)?.duration||0}));
-  latestPops.sort((a,b)=>b.pop-a.pop);
-
-  const topTrack=latestPops[0];
-  const avgPop=latestPops.length?Math.round(latestPops.reduce((s,t)=>s+t.pop,0)/latestPops.length):0;
-
-  // Delta top track
-  let delta="—";
-  if(times.length>=2){
-    const prev=times[times.length-2];
-    const d1=popMap[topTrack?.name+"||"+latest]||0;
-    const d0=popMap[topTrack?.name+"||"+prev]||0;
-    const diff=d1-d0;
-    delta=diff>0?`<span class="up">+${diff}</span>`:diff<0?`<span class="dn">${diff}</span>`:"—";
-  }
-
-  document.getElementById('sp-followers').textContent=avgPop+"/100";
-  document.getElementById('sp-delta').innerHTML=delta;
-  document.getElementById('sp-tracks').textContent=trackNames.length;
-  if(topTrack){
-    document.getElementById('sp-top-track').textContent=topTrack.name;
-    document.getElementById('sp-top-track-sub').textContent='Popularity: '+topTrack.pop+'/100';
-  }
 
   let html=`<div class="table-wrap"><table><thead><tr>
-    <th style="width:40px;text-align:center">#</th><th>Tên bài</th>`;
-  times.forEach(t=>{
-    const isL=t===latest;
-    const label=spMode==='hour'?t.split(" ")[1]+"<br><span style='color:#b8cfe0;font-size:10px'>"+t.split(" ")[0]+"</span>":t;
-    html+=`<th class="r" style="${isL?'color:var(--spotify)':''}">${label}</th>`;
+    <th style="width:40px;text-align:center">#</th>
+    <th>Tên bài</th><th class="r">Album</th><th class="r">Duration</th>`;
+  keys.forEach(k=>{
+    const isL=k===latest;
+    html+=`<th class="r" style="${isL?'color:var(--spotify)':''}">Có mặt<br><span style='font-size:10px;color:#b8cfe0'>${k}</span></th>`;
   });
-  html+=`<th class="r" style="color:var(--up)">+/-</th><th class="r">Duration</th></tr></thead><tbody>`;
+  html+=`</tr></thead><tbody>`;
 
-  latestPops.forEach((t,i)=>{
-    html+=`<tr><td class="rank-col">${i+1}</td><td class="name-col">${t.name}</td>`;
-    times.forEach(tk=>{
-      const val=popMap[t.name+"||"+tk];
-      const isL=tk===latest;
-      html+=val===undefined?`<td class="r val-empty">—</td>`:`<td class="r ${isL?'val-latest':'val-cell'}">${val}</td>`;
+  uniqueTracks.forEach((t,i)=>{
+    html+=`<tr><td class="rank-col">${i+1}</td>
+      <td class="name-col">${t.name}</td>
+      <td class="r val-cell" style="max-width:140px;overflow:hidden;text-overflow:ellipsis">${t.album||"—"}</td>
+      <td class="r val-latest">${fmtDur(t.duration)}</td>`;
+    keys.forEach(k=>{
+      const has=trackByDate[k]?.has(t.name);
+      html+=`<td class="r ${k===latest?'val-latest':'val-cell'}">${has?'✓':"—"}</td>`;
     });
-    const v1=popMap[t.name+"||"+times[times.length-1]]||0;
-    const v0=popMap[t.name+"||"+times[0]]||0;
-    html+=`<td class="r">${fmtDiff(v1-v0)}</td>`;
-    html+=`<td class="r val-cell">${fmtDur(t.duration)}</td>`;
     html+=`</tr>`;
   });
   html+=`</tbody></table></div>`;
