@@ -7,91 +7,73 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #e8f0f8; --surface: #fff; --surface2: #d6e4f0;
-  --border: #b8cfe0; --accent: #2a6fad; --accent2: #e76f51;
-  --text: #1a2e2a; --muted: #7a92a8; --green: #2a9d8f;
-  --spotify: #1DB954; --header-bg: rgba(232,240,248,0.95);
+  --bg:#e8f0f8;--surface:#fff;--surface2:#d6e4f0;
+  --border:#b8cfe0;--accent:#2a6fad;--accent2:#e76f51;
+  --text:#1a2e2a;--muted:#7a92a8;--green:#2a9d8f;
+  --spotify:#1DB954;--header-bg:rgba(232,240,248,0.95);
+  --up:#2ecc71;--down:#e74c3c;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
-header { border-bottom: 1px solid var(--border); padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; background: var(--header-bg); backdrop-filter: blur(10px); z-index: 100; }
-.logo { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 3px; color: var(--accent); }
-.logo span { color: var(--text); }
-.live-badge { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 500; color: var(--green); letter-spacing: 1px; text-transform: uppercase; }
-.live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: pulse 1.5s infinite; }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-.last-update { font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace; }
-
-/* PLATFORM TABS */
-.platform-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); background: var(--surface); }
-.ptab { padding: 12px 24px; font-size: 13px; font-weight: 500; cursor: pointer; border-bottom: 2px solid transparent; color: var(--muted); transition: all .15s; display: flex; align-items: center; gap: 8px; }
-.ptab.active { color: var(--accent); border-bottom-color: var(--accent); }
-.ptab:hover:not(.active) { color: var(--text); background: var(--surface2); }
-.ptab .dot { width: 8px; height: 8px; border-radius: 50%; }
-.ptab.yt .dot { background: #ff0000; }
-.ptab.sp .dot { background: var(--spotify); }
-
-/* CONTROLS */
-.controls { padding: 16px 32px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; border-bottom: 1px solid var(--border); background: var(--bg); }
-.ctrl-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-right: 4px; }
-.btn-group { display: flex; gap: 4px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 3px; }
-.btn { padding: 6px 14px; border-radius: 4px; border: none; background: transparent; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; transition: all .15s; }
-.btn.active { background: var(--accent); color: #fff; font-weight: 500; }
-.btn.active.sp-btn { background: var(--spotify); }
-.btn:hover:not(.active) { color: var(--text); background: var(--surface); }
-.divider { width: 1px; height: 28px; background: var(--border); margin: 0 4px; }
-
-/* STATS */
-.stats-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--border); border-bottom: 1px solid var(--border); }
-.stat-card { background: var(--surface); padding: 18px 24px; }
-.stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 6px; }
-.stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 1px; color: var(--text); line-height: 1; }
-.stat-sub { font-size: 12px; color: var(--muted); margin-top: 4px; font-family: 'DM Mono', monospace; }
-
-/* TABLE */
-.table-wrap { overflow-x: auto; padding: 20px 32px; }
-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-thead tr { border-bottom: 1px solid var(--border); }
-th { padding: 9px 12px; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--muted); font-weight: 400; white-space: nowrap; }
-th.r, td.r { text-align: right; }
-td { padding: 10px 12px; border-bottom: 1px solid var(--border); white-space: nowrap; font-family: 'DM Mono', monospace; font-size: 13px; }
-td.name-col { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; color: var(--text); max-width: 260px; overflow: hidden; text-overflow: ellipsis; }
-td.rank-col { font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: var(--muted); text-align: center; width: 40px; }
-tr { background: var(--surface); }
-tr:hover td { background: var(--surface2); }
-.val-cell { color: var(--muted); }
-.val-latest { color: var(--text); font-weight: 500; }
-.val-empty { color: var(--border); }
-
-/* SPOTIFY TABLE */
-.sp-followers { font-size: 28px; font-family: 'Bebas Neue', sans-serif; color: var(--spotify); }
-.sp-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 6px; }
-.sp-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; }
-
-.loading { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 32px; gap: 16px; }
-.spinner { width: 32px; height: 32px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-.loading-txt { color: var(--muted); font-size: 13px; }
-.error-box { margin: 32px; padding: 20px; border: 1px solid var(--accent2); border-radius: 8px; color: var(--accent2); font-size: 13px; background: #fff3f0; }
-.hidden { display: none; }
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh}
+header{border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--header-bg);backdrop-filter:blur(10px);z-index:100}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:3px;color:var(--accent)}
+.logo span{color:var(--text)}
+.live-badge{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:500;color:var(--green);letter-spacing:1px;text-transform:uppercase}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.last-update{font-size:12px;color:var(--muted);font-family:'DM Mono',monospace}
+.platform-tabs{display:flex;border-bottom:1px solid var(--border);background:var(--surface)}
+.ptab{padding:12px 24px;font-size:13px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;color:var(--muted);transition:all .15s;display:flex;align-items:center;gap:8px}
+.ptab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.ptab:hover:not(.active){color:var(--text);background:var(--surface2)}
+.ptab .dot{width:8px;height:8px;border-radius:50%}
+.ptab.yt .dot{background:#ff0000}
+.ptab.sp .dot{background:var(--spotify)}
+.controls{padding:14px 32px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--border);background:var(--bg)}
+.ctrl-label{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-right:4px}
+.btn-group{display:flex;gap:4px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:3px}
+.btn{padding:6px 14px;border-radius:4px;border:none;background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all .15s}
+.btn.active{background:var(--accent);color:#fff;font-weight:500}
+.btn.active.sp-btn{background:var(--spotify)}
+.btn:hover:not(.active){color:var(--text);background:var(--surface)}
+.divider{width:1px;height:28px;background:var(--border);margin:0 4px}
+.stats-row{display:grid;gap:1px;background:var(--border);border-bottom:1px solid var(--border)}
+.stat-card{background:var(--surface);padding:16px 22px}
+.stat-label{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:6px}
+.stat-val{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:1px;color:var(--text);line-height:1}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:4px;font-family:'DM Mono',monospace}
+.table-wrap{overflow-x:auto;padding:20px 32px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead tr{border-bottom:1px solid var(--border)}
+th{padding:9px 12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);font-weight:400;white-space:nowrap}
+th.r,td.r{text-align:right}
+td{padding:10px 12px;border-bottom:1px solid var(--border);white-space:nowrap;font-family:'DM Mono',monospace;font-size:13px}
+td.name-col{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--text);max-width:240px;overflow:hidden;text-overflow:ellipsis}
+td.rank-col{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--muted);text-align:center;width:40px}
+tr{background:var(--surface)}
+tr:hover td{background:var(--surface2)}
+.val-cell{color:var(--muted)}
+.val-latest{color:var(--text);font-weight:500}
+.val-empty{color:var(--border)}
+.up{color:var(--up)}
+.dn{color:var(--down)}
+.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 32px;gap:16px}
+.spinner{width:32px;height:32px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-txt{color:var(--muted);font-size:13px}
+.error-box{margin:32px;padding:20px;border:1px solid var(--accent2);border-radius:8px;color:var(--accent2);font-size:13px;background:#fff3f0}
+.hidden{display:none}
 </style>
 </head>
 <body>
-
 <header>
   <div class="logo">CONGB <span>Tracker</span></div>
   <div class="live-badge"><div class="live-dot"></div> Live</div>
   <div class="last-update" id="last-update">Đang tải...</div>
 </header>
-
-<!-- Platform tabs -->
 <div class="platform-tabs">
-  <div class="ptab yt active" onclick="setPlatform('youtube', this)">
-    <div class="dot"></div> YouTube
-  </div>
-  <div class="ptab sp" onclick="setPlatform('spotify', this)">
-    <div class="dot"></div> Spotify
-  </div>
+  <div class="ptab yt active" onclick="setPlatform('youtube',this)"><div class="dot"></div> YouTube</div>
+  <div class="ptab sp" onclick="setPlatform('spotify',this)"><div class="dot"></div> Spotify</div>
 </div>
 
 <!-- YouTube panel -->
@@ -110,13 +92,10 @@ tr:hover td { background: var(--surface2); }
       <button class="btn" onclick="setMetric('comments',this)">Comments</button>
     </div>
   </div>
-  <div class="stats-row" style="grid-template-columns:repeat(6,minmax(0,1fr))">
-    <div class="stat-card"><div class="stat-label">Tổng views</div><div class="stat-val" id="s-views">—</div><div class="stat-sub">mới nhất</div></div>
-    <div class="stat-card"><div class="stat-label">Tổng likes</div><div class="stat-val" id="s-likes">—</div><div class="stat-sub">mới nhất</div></div>
-    <div class="stat-card"><div class="stat-label">Số video</div><div class="stat-val" id="s-videos">—</div><div class="stat-sub">trong playlist</div></div>
-    <div class="stat-card"><div class="stat-label">TB tăng / giờ</div><div class="stat-val" id="s-per-hour">—</div><div class="stat-sub">trung bình</div></div>
-    <div class="stat-card"><div class="stat-label">TB tăng / ngày</div><div class="stat-val" id="s-per-day">—</div><div class="stat-sub">trung bình</div></div>
-    <div class="stat-card"><div class="stat-label">Giờ tăng cao nhất</div><div class="stat-val" id="s-peak" style="font-size:18px;padding-top:6px">—</div><div class="stat-sub" id="s-peak-val">—</div></div>
+  <div class="stats-row" id="yt-stats" style="grid-template-columns:repeat(3,minmax(0,1fr))">
+    <div class="stat-card"><div class="stat-label" id="sl-main">Tổng views</div><div class="stat-val" id="s-main">—</div><div class="stat-sub">mới nhất</div></div>
+    <div class="stat-card"><div class="stat-label" id="sl-avg-h">TB tăng / giờ</div><div class="stat-val" id="s-avg-h">—</div><div class="stat-sub">so với giờ trước</div></div>
+    <div class="stat-card"><div class="stat-label" id="sl-peak">Giờ tăng cao nhất</div><div class="stat-val" id="s-peak" style="font-size:18px;padding-top:6px">—</div><div class="stat-sub" id="s-peak-sub">—</div></div>
   </div>
   <div id="yt-content"><div class="loading"><div class="spinner"></div><div class="loading-txt">Đang tải...</div></div></div>
 </div>
@@ -130,252 +109,232 @@ tr:hover td { background: var(--surface2); }
       <button class="btn sp-btn" onclick="setSpMode('month',this)">Tháng</button>
     </div>
   </div>
-  <div class="stats-row">
+  <div class="stats-row" style="grid-template-columns:repeat(3,minmax(0,1fr))">
     <div class="stat-card"><div class="stat-label">Followers hiện tại</div><div class="stat-val" id="sp-followers" style="color:var(--spotify)">—</div><div class="stat-sub">mới nhất</div></div>
+    <div class="stat-card"><div class="stat-label">Tăng / ngày</div><div class="stat-val" id="sp-delta">—</div><div class="stat-sub">so với hôm qua</div></div>
     <div class="stat-card"><div class="stat-label">Số bài theo dõi</div><div class="stat-val" id="sp-tracks">—</div><div class="stat-sub">top tracks</div></div>
-    <div class="stat-card"><div class="stat-label">Cập nhật</div><div class="stat-val" id="sp-date" style="font-size:18px;padding-top:8px">—</div><div class="stat-sub">lần gần nhất</div></div>
   </div>
   <div id="sp-content"><div class="loading"><div class="spinner"></div><div class="loading-txt">Đang tải...</div></div></div>
 </div>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzkVClkhBSfHLs35AVvi33jHP4u_PXo-0OPC3HwkzOL8Qqibu97a74MsATTk1C3lEuH/exec";
-const API = "https://api.allorigins.win/get?url=" + encodeURIComponent(SCRIPT_URL);
+const SCRIPT_URL="https://script.google.com/macros/s/AKfycbzkVClkhBSfHLs35AVvi33jHP4u_PXo-0OPC3HwkzOL8Qqibu97a74MsATTk1C3lEuH/exec";
+let ytData=[],spData=[],platform="youtube",mode="hour",metric="views",spMode="day";
 
-let ytData = [], spData = [];
-let platform = "youtube";
-let mode     = "hour";
-let metric   = "views";
-let spMode   = "day";
-
-function setPlatform(p, btn) {
-  platform = p;
-  document.querySelectorAll('.ptab').forEach(b => b.classList.remove('active'));
+function setPlatform(p,btn){
+  platform=p;
+  document.querySelectorAll('.ptab').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  document.getElementById('panel-youtube').classList.toggle('hidden', p !== 'youtube');
-  document.getElementById('panel-spotify').classList.toggle('hidden', p !== 'spotify');
-  if (p === 'spotify') renderSpotify();
+  document.getElementById('panel-youtube').classList.toggle('hidden',p!=='youtube');
+  document.getElementById('panel-spotify').classList.toggle('hidden',p!=='spotify');
+  if(p==='spotify') renderSpotify();
 }
-function setMode(m, btn) {
-  mode = m;
-  document.querySelectorAll('#grp-mode .btn').forEach(b => b.classList.remove('active'));
+function setMode(m,btn){
+  mode=m;
+  document.querySelectorAll('#grp-mode .btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   renderYouTube();
 }
-function setMetric(m, btn) {
-  metric = m;
-  document.querySelectorAll('#grp-metric .btn').forEach(b => b.classList.remove('active'));
+function setMetric(m,btn){
+  metric=m;
+  document.querySelectorAll('#grp-metric .btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   renderYouTube();
 }
-function setSpMode(m, btn) {
-  spMode = m;
-  document.querySelectorAll('#grp-sp-mode .btn').forEach(b => b.classList.remove('active'));
+function setSpMode(m,btn){
+  spMode=m;
+  document.querySelectorAll('#grp-sp-mode .btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   renderSpotify();
 }
 
-function fmtDur(ms) { if(!ms) return "—"; const m=Math.floor(ms/60000); const s=Math.floor((ms%60000)/1000); return m+":"+String(s).padStart(2,"0"); }
-function fmt(n) { if (!n && n!==0) return "—"; if(n>=1e6) return (n/1e6).toFixed(2)+"M"; if(n>=1e3) return (n/1e3).toFixed(1)+"K"; return n.toLocaleString("vi-VN"); }
-function fmtFull(n) { if(n===null||n===undefined) return "—"; return Number(n).toLocaleString("vi-VN"); }
+function fmt(n){if(!n&&n!==0)return"—";if(n>=1e6)return(n/1e6).toFixed(2)+"M";if(n>=1e3)return(n/1e3).toFixed(1)+"K";return n.toLocaleString("vi-VN")}
+function fmtFull(n){if(n===null||n===undefined)return"—";return Number(n).toLocaleString("vi-VN")}
+function fmtDur(ms){if(!ms)return"—";const m=Math.floor(ms/60000);const s=Math.floor((ms%60000)/1000);return m+":"+String(s).padStart(2,"0")}
+function fmtDiff(n){if(!n&&n!==0)return"";if(n>0)return`<span class="up">+${fmtFull(n)}</span>`;if(n<0)return`<span class="dn">${fmtFull(n)}</span>`;return"—"}
+function getYTTimeKey(row){return mode==="hour"?(row.hour||row.date):row.date}
 
-function getYTTimeKey(row) { return mode === "hour" ? (row.hour || row.date) : row.date; }
-
-function renderYouTube() {
-  if (!ytData.length) return;
-  const videoMap = {};
-  ytData.forEach(r => {
-    if (!videoMap[r.title]) videoMap[r.title] = {};
-    const t = getYTTimeKey(r);
-    videoMap[r.title][t] = { views: r.views, likes: r.likes, comments: r.comments };
+function renderYouTube(){
+  if(!ytData.length) return;
+  const videoMap={};
+  ytData.forEach(r=>{
+    if(!videoMap[r.title]) videoMap[r.title]={};
+    const t=getYTTimeKey(r);
+    if(!videoMap[r.title][t]||r.hour>=(videoMap[r.title][t].hour||""))
+      videoMap[r.title][t]={views:r.views,likes:r.likes,comments:r.comments,hour:r.hour||""};
   });
-  const allTimes = [...new Set(ytData.map(r => getYTTimeKey(r)))].sort();
-  const times = allTimes.slice(-3);
-  const latest = times[times.length - 1];
-  const videos = Object.keys(videoMap).sort((a,b) => (videoMap[b][latest]?.views||0)-(videoMap[a][latest]?.views||0));
+  const allTimes=[...new Set(ytData.map(r=>getYTTimeKey(r)))].sort();
+  const times=mode==='day'?allTimes.slice(-7):allTimes.slice(-24);
+  const latest=times[times.length-1];
+  const videos=Object.keys(videoMap).sort((a,b)=>(videoMap[b][latest]?.views||0)-(videoMap[a][latest]?.views||0));
 
-  let tv=0, tl=0;
-  videos.forEach(v => { const c=videoMap[v][latest]; if(c){tv+=c.views||0;tl+=c.likes||0;} });
-  document.getElementById('s-views').textContent = fmt(tv);
-  document.getElementById('s-likes').textContent = fmt(tl);
-  document.getElementById('s-videos').textContent = videos.length;
+  // Stats labels
+  const metricLabel={views:"Tổng views",likes:"Tổng likes",comments:"Tổng comments"};
+  const metricKey=metric;
+  document.getElementById('sl-main').textContent=metricLabel[metricKey];
 
-  // TB tăng / giờ
-  if (times.length >= 2) {
-    const prev = times[times.length - 2];
-    let diffH = 0;
-    videos.forEach(v => {
-      const c1 = videoMap[v][latest]?.views || 0;
-      const c0 = videoMap[v][prev]?.views || 0;
-      diffH += c1 - c0;
-    });
-    document.getElementById('s-per-hour').textContent = "+" + fmt(Math.round(diffH));
-  }
+  let total=0;
+  videos.forEach(v=>{const c=videoMap[v][latest];if(c) total+=c[metricKey]||0;});
+  document.getElementById('s-main').textContent=fmt(total);
 
-  // TB tăng / ngày — lấy tất cả data theo ngày
-  const dayMap = {};
-  ytData.forEach(r => {
-    const d = r.date;
-    if (!dayMap[d]) dayMap[d] = 0;
-    const t = getYTTimeKey(r);
-    if (t === latest || mode === 'day') {
-      videos.forEach(v => { if (r.title === v) dayMap[d] += 0; });
-    }
-  });
-  // Tính tổng views theo ngày
-  const dayTotals = {};
-  ytData.forEach(r => {
-    if (!dayTotals[r.date]) dayTotals[r.date] = {};
-    if (!dayTotals[r.date][r.title] || r.hour >= (dayTotals[r.date][r.title].hour||"")) {
-      dayTotals[r.date][r.title] = { views: r.views, hour: r.hour };
-    }
-  });
-  const dayDates = Object.keys(dayTotals).sort();
-  if (dayDates.length >= 2) {
-    const d1 = dayDates[dayDates.length - 1];
-    const d0 = dayDates[dayDates.length - 2];
-    let diffD = 0;
-    videos.forEach(v => {
-      const v1 = dayTotals[d1]?.[v]?.views || 0;
-      const v0 = dayTotals[d0]?.[v]?.views || 0;
-      diffD += v1 - v0;
-    });
-    document.getElementById('s-per-day').textContent = "+" + fmt(Math.round(diffD));
+  // TB tăng / giờ (hoặc ngày)
+  if(times.length>=2){
+    const prev=times[times.length-2];
+    let diff=0;
+    videos.forEach(v=>{diff+=(videoMap[v][latest]?.[metricKey]||0)-(videoMap[v][prev]?.[metricKey]||0);});
+    const el=document.getElementById('s-avg-h');
+    el.innerHTML=diff>=0?`<span class="up">+${fmt(diff)}</span>`:`<span class="dn">${fmt(diff)}</span>`;
+    document.getElementById('sl-avg-h').textContent=mode==='hour'?'TB tăng / giờ':'TB tăng / ngày';
   }
 
   // Giờ tăng cao nhất
-  if (times.length >= 2) {
-    let peakTime = "", peakDiff = 0;
-    for (let i = 1; i < times.length; i++) {
-      let diff = 0;
-      videos.forEach(v => {
-        diff += (videoMap[v][times[i]]?.views||0) - (videoMap[v][times[i-1]]?.views||0);
-      });
-      if (diff > peakDiff) { peakDiff = diff; peakTime = times[i]; }
+  if(times.length>=2){
+    let peakTime="",peakDiff=0;
+    for(let i=1;i<times.length;i++){
+      let diff=0;
+      videos.forEach(v=>{diff+=(videoMap[v][times[i]]?.[metricKey]||0)-(videoMap[v][times[i-1]]?.[metricKey]||0);});
+      if(diff>peakDiff){peakDiff=diff;peakTime=times[i];}
     }
-    if (peakTime) {
-      document.getElementById('s-peak').textContent = mode==='hour' ? peakTime.split(" ")[1] : peakTime;
-      document.getElementById('s-peak-val').textContent = "+" + fmt(peakDiff) + " views";
+    if(peakTime){
+      document.getElementById('s-peak').textContent=mode==='hour'?peakTime.split(" ")[1]:peakTime;
+      document.getElementById('s-peak-sub').textContent="+"+fmt(peakDiff)+" "+metricKey;
+      document.getElementById('sl-peak').textContent=mode==='hour'?'Giờ tăng cao nhất':'Ngày tăng cao nhất';
     }
   }
 
-  let html = `<div class="table-wrap"><table><thead><tr><th style="width:40px;text-align:center">#</th><th>Tên video</th>`;
-  times.forEach(t => {
-    const isL = t === latest;
-    const label = mode==="hour" ? t.split(" ")[1]+"<br><span style='color:#b8cfe0;font-size:10px'>"+t.split(" ")[0]+"</span>" : t;
-    html += `<th class="r" style="${isL?'color:var(--accent2)':''}">${label}</th>`;
+  // Table
+  let html=`<div class="table-wrap"><table><thead><tr>
+    <th style="width:40px;text-align:center">#</th><th>Tên video</th>`;
+  times.forEach(t=>{
+    const isL=t===latest;
+    const label=mode==="hour"?t.split(" ")[1]+"<br><span style='color:#b8cfe0;font-size:10px'>"+t.split(" ")[0]+"</span>":t;
+    html+=`<th class="r" style="${isL?'color:var(--accent2)':''}">${label}</th>`;
   });
-  html += `</tr></thead><tbody>`;
-  videos.forEach((v,i) => {
-    const short = v.replace(/CONGB\s*/i,"").replace(/\|.*/,"").trim();
-    html += `<tr><td class="rank-col">${i+1}</td><td class="name-col" title="${v}">${short}</td>`;
-    times.forEach(t => {
-      const cell = videoMap[v][t];
-      const val  = cell ? cell[metric] : null;
-      html += val===null||val===undefined ? `<td class="r val-empty">—</td>` : `<td class="r ${t===latest?'val-latest':'val-cell'}">${fmtFull(val)}</td>`;
+  html+=`<th class="r" style="color:var(--up)">+/-</th></tr></thead><tbody>`;
+
+  videos.forEach((v,i)=>{
+    const short=v.replace(/CONGB\s*/i,"").replace(/\|.*/,"").trim();
+    html+=`<tr><td class="rank-col">${i+1}</td><td class="name-col" title="${v}">${short}</td>`;
+    times.forEach(t=>{
+      const cell=videoMap[v][t];
+      const val=cell?cell[metricKey]:null;
+      const isL=t===latest;
+      html+=val===null||val===undefined?`<td class="r val-empty">—</td>`:`<td class="r ${isL?'val-latest':'val-cell'}">${fmtFull(val)}</td>`;
     });
-    html += `</tr>`;
+    // Cột +/- (mới nhất - cũ nhất trong range)
+    const first=times[0],last=times[times.length-1];
+    const v1=videoMap[v][last]?.[metricKey]||0;
+    const v0=videoMap[v][first]?.[metricKey]||0;
+    html+=`<td class="r">${fmtDiff(v1-v0)}</td>`;
+    html+=`</tr>`;
   });
-  html += `</tbody></table></div>`;
-  document.getElementById('yt-content').innerHTML = html;
+  html+=`</tbody></table></div>`;
+  document.getElementById('yt-content').innerHTML=html;
 }
 
-function renderSpotify() {
-  if (!spData.length) { document.getElementById('sp-content').innerHTML = '<div class="loading"><div class="loading-txt">Chưa có data Spotify</div></div>'; return; }
+function renderSpotify(){
+  if(!spData.length){document.getElementById('sp-content').innerHTML='<div class="loading"><div class="loading-txt">Chưa có data Spotify</div></div>';return;}
+  const artists=spData.filter(r=>r.type==="artist");
+  const tracks=spData.filter(r=>r.type==="track");
 
-  const artists = spData.filter(r => r.type === "artist");
-  const tracks  = spData.filter(r => r.type === "track");
-
-  // Followers theo ngày
-  const followersByDate = {};
-  artists.forEach(r => { followersByDate[r.date] = r.value; });
-
-  // Tháng
-  const followersByMonth = {};
-  artists.forEach(r => {
-    const parts = r.date.split("/");
-    const month = parts[1] + "/" + parts[2];
-    if (!followersByMonth[month]) followersByMonth[month] = r.value;
-    else followersByMonth[month] = Math.max(followersByMonth[month], r.value);
+  const followersByDate={};
+  artists.forEach(r=>{followersByDate[r.date]=r.value;});
+  const followersByMonth={};
+  artists.forEach(r=>{
+    const p=r.date.split("/");const month=p[1]+"/"+p[2];
+    if(!followersByMonth[month]) followersByMonth[month]=r.value;
+    else followersByMonth[month]=Math.max(followersByMonth[month],r.value);
   });
 
-  const dates = spMode === "day"
-    ? Object.keys(followersByDate).sort().slice(-7)
-    : Object.keys(followersByMonth).sort().slice(-7);
-  const valMap = spMode === "day" ? followersByDate : followersByMonth;
+  const allDates=Object.keys(followersByDate).sort();
+  const dates=spMode==="day"?allDates.slice(-7):Object.keys(followersByMonth).sort().slice(-7);
+  const valMap=spMode==="day"?followersByDate:followersByMonth;
+  const latestDate=allDates[allDates.length-1];
+  const latestFollowers=followersByDate[latestDate]||0;
+  const latestTracks=tracks.filter(r=>r.date===latestDate);
 
-  const latestDate = Object.keys(followersByDate).sort().pop();
-  const latestFollowers = followersByDate[latestDate] || 0;
-
-  // Tracks mới nhất
-  const latestTracks = tracks.filter(r => r.date === latestDate);
-
-  document.getElementById('sp-followers').textContent = fmt(latestFollowers);
-  document.getElementById('sp-tracks').textContent    = latestTracks.length;
-  document.getElementById('sp-date').textContent      = latestDate || "—";
-
-  let html = `<div class="table-wrap">`;
-
-  // Followers trend
-  html += `<table style="margin-bottom:24px"><thead><tr><th>Chỉ số</th>`;
-  dates.forEach(d => { html += `<th class="r" style="${d===dates[dates.length-1]?'color:var(--spotify)':''}">${d}</th>`; });
-  html += `</tr></thead><tbody><tr><td class="name-col">Followers</td>`;
-  dates.forEach(d => { html += `<td class="r ${d===dates[dates.length-1]?'val-latest':'val-cell'}">${fmtFull(valMap[d])}</td>`; });
-  html += `</tr></tbody></table>`;
-
-  // Top tracks
-  if (latestTracks.length) {
-    html += `<table><thead><tr><th style="width:40px;text-align:center">#</th><th>Tên bài</th><th class="r">Album</th><th class="r">Duration</th></tr></thead><tbody>`;
-    latestTracks.sort((a,b) => (b.value||0)-(a.value||0)).forEach((t,i) => {
-      html += `<tr><td class="rank-col">${i+1}</td><td class="name-col">${t.name}</td><td class="r val-cell" style="max-width:160px;overflow:hidden;text-overflow:ellipsis">${t.album||"—"}</td><td class="r val-latest">${fmtDur(t.duration)}</td></tr>`;
-    });
-    html += `</tbody></table>`;
+  // Delta followers
+  let delta="—";
+  if(allDates.length>=2){
+    const d1=allDates[allDates.length-1];
+    const d0=allDates[allDates.length-2];
+    const diff=(followersByDate[d1]||0)-(followersByDate[d0]||0);
+    delta=diff>=0?`<span class="up">+${fmtFull(diff)}</span>`:`<span class="dn">${fmtFull(diff)}</span>`;
   }
 
-  html += `</div>`;
-  document.getElementById('sp-content').innerHTML = html;
+  document.getElementById('sp-followers').textContent=fmt(latestFollowers);
+  document.getElementById('sp-delta').innerHTML=delta;
+  document.getElementById('sp-tracks').textContent=latestTracks.length;
+
+  let html=`<div class="table-wrap">`;
+
+  // Followers trend table
+  html+=`<table style="margin-bottom:24px"><thead><tr><th>Chỉ số</th>`;
+  dates.forEach(d=>{html+=`<th class="r" style="${d===dates[dates.length-1]?'color:var(--spotify)':''}">${d}</th>`;});
+  html+=`<th class="r" style="color:var(--up)">+/-</th></tr></thead><tbody><tr><td class="name-col">Followers</td>`;
+  dates.forEach(d=>{
+    const isL=d===dates[dates.length-1];
+    html+=`<td class="r ${isL?'val-latest':'val-cell'}">${fmtFull(valMap[d])}</td>`;
+  });
+  // +/- followers
+  const fFirst=valMap[dates[0]]||0;
+  const fLast=valMap[dates[dates.length-1]]||0;
+  html+=`<td class="r">${fmtDiff(fLast-fFirst)}</td>`;
+  html+=`</tr></tbody></table>`;
+
+  // Top tracks table
+  if(latestTracks.length){
+    html+=`<table><thead><tr>
+      <th style="width:40px;text-align:center">#</th>
+      <th>Tên bài</th>
+      <th class="r">Album</th>
+      <th class="r">Duration</th>
+    </tr></thead><tbody>`;
+    latestTracks.sort((a,b)=>(b.value||0)-(a.value||0)).forEach((t,i)=>{
+      html+=`<tr>
+        <td class="rank-col">${i+1}</td>
+        <td class="name-col">${t.name}</td>
+        <td class="r val-cell" style="max-width:160px;overflow:hidden;text-overflow:ellipsis">${t.album||"—"}</td>
+        <td class="r val-latest">${fmtDur(t.duration)}</td>
+      </tr>`;
+    });
+    html+=`</tbody></table>`;
+  }
+  html+=`</div>`;
+  document.getElementById('sp-content').innerHTML=html;
 }
 
-async function fetchWithFallback() {
-  const proxies = [
+async function fetchWithFallback(){
+  const proxies=[
     `https://api.allorigins.win/get?url=${encodeURIComponent(SCRIPT_URL)}`,
     `https://corsproxy.io/?${encodeURIComponent(SCRIPT_URL)}`,
   ];
-  try {
-    const res = await fetch(SCRIPT_URL);
-    const j   = await res.json();
-    return j;
-  } catch(e) {}
-  for (const proxy of proxies) {
-    try {
-      const res = await fetch(proxy);
-      const j   = await res.json();
-      if (j.contents) return JSON.parse(j.contents);
-      if (j.youtube)  return j;
-    } catch(e) {}
+  try{const res=await fetch(SCRIPT_URL);return await res.json();}catch(e){}
+  for(const proxy of proxies){
+    try{
+      const res=await fetch(proxy);const j=await res.json();
+      if(j.contents)return JSON.parse(j.contents);
+      if(j.youtube)return j;
+    }catch(e){}
   }
   throw new Error("Không kết nối được API");
 }
 
-async function loadData() {
-  try {
-    const data = await fetchWithFallback();
-    ytData = data.youtube || [];
-    spData = data.spotify || [];
-
-    document.getElementById('last-update').textContent =
-      "Cập nhật: " + new Date().toLocaleTimeString("vi-VN", {hour:"2-digit",minute:"2-digit"});
-
+async function loadData(){
+  try{
+    const data=await fetchWithFallback();
+    ytData=data.youtube||[];
+    spData=data.spotify||[];
+    document.getElementById('last-update').textContent="Cập nhật: "+new Date().toLocaleTimeString("vi-VN",{hour:"2-digit",minute:"2-digit"});
     renderYouTube();
-    if (platform === "spotify") renderSpotify();
-  } catch(e) {
-    document.getElementById('yt-content').innerHTML =
-      `<div class="error-box">Không tải được dữ liệu.<br><small>${e.message}</small></div>`;
+    if(platform==='spotify') renderSpotify();
+  }catch(e){
+    document.getElementById('yt-content').innerHTML=`<div class="error-box">Không tải được dữ liệu.<br><small>${e.message}</small></div>`;
   }
 }
 
 loadData();
-setInterval(loadData, 60 * 60 * 1000);
+setInterval(loadData,60*60*1000);
 </script>
 </body>
 </html>
