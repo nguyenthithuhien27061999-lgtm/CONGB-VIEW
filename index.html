@@ -106,6 +106,7 @@ tr:hover td{background:var(--surface2)}
   <div class="controls">
     <span class="ctrl-label">Xem theo</span>
     <div class="btn-group" id="grp-sp-mode">
+      <button class="btn sp-btn" onclick="setSpMode('hour',this)">Giờ</button>
       <button class="btn active sp-btn" onclick="setSpMode('day',this)">Ngày</button>
       <button class="btn sp-btn" onclick="setSpMode('month',this)">Tháng</button>
     </div>
@@ -255,6 +256,8 @@ function renderSpotify(){
   const artists=spData.filter(r=>r.type==="artist");
   const tracks=spData.filter(r=>r.type==="track");
 
+  const followersByHour={};
+  artists.forEach(r=>{if(r.hour) followersByHour[r.hour]=r.value; else followersByHour[r.date+" 00:00"]=r.value;});
   const followersByDate={};
   artists.forEach(r=>{followersByDate[r.date]=r.value;});
   const followersByMonth={};
@@ -264,11 +267,15 @@ function renderSpotify(){
     else followersByMonth[month]=Math.max(followersByMonth[month],r.value);
   });
 
+  const allHours=Object.keys(followersByHour).sort();
   const allDates=Object.keys(followersByDate).sort();
-  const dates=spMode==="day"?allDates.slice(-7):Object.keys(followersByMonth).sort().slice(-7);
-  const valMap=spMode==="day"?followersByDate:followersByMonth;
+  let dates,valMap;
+  if(spMode==="hour"){dates=allHours.slice(-24);valMap=followersByHour;}
+  else if(spMode==="day"){dates=allDates.slice(-7);valMap=followersByDate;}
+  else{dates=Object.keys(followersByMonth).sort().slice(-7);valMap=followersByMonth;}
   const latestDate=allDates[allDates.length-1];
-  const latestFollowers=followersByDate[latestDate]||0;
+  const latestKey=spMode==='hour'?allHours[allHours.length-1]:latestDate;
+  const latestFollowers=spMode==='hour'?(followersByHour[latestKey]||0):(followersByDate[latestDate]||0);
   const latestTracks=tracks.filter(r=>r.date===latestDate);
 
   // Delta followers
@@ -302,8 +309,8 @@ function renderSpotify(){
     html+=`<td class="r ${isL?'val-latest':'val-cell'}">${fmtFull(valMap[d])}</td>`;
   });
   // +/- followers
-  const fFirst=valMap[dates[0]]||0;
-  const fLast=valMap[dates[dates.length-1]]||0;
+  const fFirst=Number(valMap[dates[0]])||0;
+  const fLast=Number(valMap[dates[dates.length-1]])||0;
   html+=`<td class="r">${fmtDiff(fLast-fFirst)}</td>`;
   html+=`</tr></tbody></table>`;
 
