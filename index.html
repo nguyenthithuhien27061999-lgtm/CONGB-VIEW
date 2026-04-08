@@ -306,11 +306,12 @@ function renderSpotify(){
 }
 
 async function fetchWithFallback(){
+  const bust = "?t=" + Date.now();
   const proxies=[
-    `https://api.allorigins.win/get?url=${encodeURIComponent(SCRIPT_URL)}`,
-    `https://corsproxy.io/?${encodeURIComponent(SCRIPT_URL)}`,
+    `https://api.allorigins.win/get?url=${encodeURIComponent(SCRIPT_URL+bust)}`,
+    `https://corsproxy.io/?${encodeURIComponent(SCRIPT_URL+bust)}`,
   ];
-  try{const res=await fetch(SCRIPT_URL);return await res.json();}catch(e){}
+  try{const res=await fetch(SCRIPT_URL+bust);return await res.json();}catch(e){}
   for(const proxy of proxies){
     try{
       const res=await fetch(proxy);const j=await res.json();
