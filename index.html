@@ -167,6 +167,7 @@ function renderYouTube(){
       document.getElementById('s-peak').textContent=mode==='hour'?peakTime.split(" ")[1]:peakTime;
       document.getElementById('s-peak-sub').textContent="+"+fmt(peakDiff)+" "+metricKey;
       document.getElementById('sl-peak').textContent=mode==='hour'?'Giờ tăng cao nhất':'Ngày tăng cao nhất';
+      document.getElementById('sl-avg-h').textContent=mode==='hour'?'TB tăng / giờ':'TB tăng / ngày';
     }
   }
 
@@ -181,7 +182,19 @@ function renderYouTube(){
     if(topVideo){
       const short=topVideo.replace(/CONGB\s*/i,"").replace(/\|.*/,"").trim();
       document.getElementById('s-top-video').textContent=short;
-      document.getElementById('s-top-video-sub').innerHTML=`<span class="up">+${fmt(topDiff)}</span> ${metricKey}`;
+
+      // Tính TB tăng/giờ và giờ tăng nhiều nhất của bài đó
+      let peakT="",peakD=0,totalD=0,countD=0;
+      for(let i=1;i<times.length;i++){
+        const d=(videoMap[topVideo][times[i]]?.[metricKey]||0)-(videoMap[topVideo][times[i-1]]?.[metricKey]||0);
+        if(d>0){totalD+=d;countD++;}
+        if(d>peakD){peakD=d;peakT=times[i];}
+      }
+      const avgH=countD>0?Math.round(totalD/countD):0;
+      const peakLabel=mode==='hour'?(peakT.split(" ")[1]||peakT):peakT;
+      const unit=mode==='hour'?'giờ':'ngày';
+      document.getElementById('s-top-video-sub').innerHTML=
+        `<span class="up">+${fmt(topDiff)}</span> ${metricKey} &nbsp;|&nbsp; TB: +${fmt(avgH)}/${unit} &nbsp;|&nbsp; Đỉnh: ${peakLabel}`;
       document.getElementById('sl-top-video').textContent='Bài tăng cao nhất';
     }
   }
