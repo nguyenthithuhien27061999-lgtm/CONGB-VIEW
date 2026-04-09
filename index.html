@@ -6,13 +6,7 @@
 <title>CONGB — Tracker</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg:#e8f0f8;--surface:#fff;--surface2:#d6e4f0;
-  --border:#b8cfe0;--accent:#2a6fad;--accent2:#e76f51;
-  --text:#1a2e2a;--muted:#7a92a8;--green:#2a9d8f;
-  --spotify:#1DB954;--header-bg:rgba(232,240,248,0.95);
-  --up:#2ecc71;--down:#e74c3c;
-}
+:root{--bg:#e8f0f8;--surface:#fff;--surface2:#d6e4f0;--border:#b8cfe0;--accent:#2a6fad;--accent2:#e76f51;--text:#1a2e2a;--muted:#7a92a8;--green:#2a9d8f;--spotify:#1DB954;--header-bg:rgba(232,240,248,0.95);--up:#2ecc71;--dn:#e74c3c}
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh}
 header{border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--header-bg);backdrop-filter:blur(10px);z-index:100}
@@ -22,7 +16,14 @@ header{border-bottom:1px solid var(--border);padding:16px 32px;display:flex;alig
 .live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
 .last-update{font-size:12px;color:var(--muted);font-family:'DM Mono',monospace}
-
+.platform-tabs{display:flex;border-bottom:1px solid var(--border);background:var(--surface)}
+.ptab{padding:12px 24px;font-size:13px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;color:var(--muted);transition:all .15s;display:flex;align-items:center;gap:8px}
+.ptab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.ptab.sp-tab.active{color:var(--spotify);border-bottom-color:var(--spotify)}
+.ptab:hover:not(.active){color:var(--text);background:var(--surface2)}
+.ptab .dot{width:8px;height:8px;border-radius:50%}
+.ptab.yt .dot{background:#ff0000}
+.ptab.sp .dot{background:var(--spotify)}
 .controls{padding:14px 32px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--border);background:var(--bg)}
 .ctrl-label{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-right:4px}
 .btn-group{display:flex;gap:4px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:3px}
@@ -50,13 +51,15 @@ tr:hover td{background:var(--surface2)}
 .val-latest{color:var(--text);font-weight:500}
 .val-empty{color:var(--border)}
 .up{color:var(--up)}
-.dn{color:var(--down)}
+.dn{color:var(--dn)}
 .loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 32px;gap:16px}
 .spinner{width:32px;height:32px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading-txt{color:var(--muted);font-size:13px}
 .error-box{margin:32px;padding:20px;border:1px solid var(--accent2);border-radius:8px;color:var(--accent2);font-size:13px;background:#fff3f0}
 .hidden{display:none}
+.sp-input-hint{margin:16px 32px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-size:13px;color:var(--muted);line-height:1.6}
+.sp-input-hint code{font-family:'DM Mono',monospace;font-size:12px;background:var(--surface2);padding:2px 6px;border-radius:4px}
 </style>
 </head>
 <body>
@@ -66,6 +69,10 @@ tr:hover td{background:var(--surface2)}
   <div class="last-update" id="last-update">Đang tải...</div>
 </header>
 
+<div class="platform-tabs">
+  <div class="ptab yt active" onclick="setPlatform('youtube',this)"><div class="dot"></div> YouTube</div>
+  <div class="ptab sp sp-tab" onclick="setPlatform('spotify',this)"><div class="dot"></div> Spotify</div>
+</div>
 
 <!-- YouTube panel -->
 <div id="panel-youtube">
@@ -85,41 +92,55 @@ tr:hover td{background:var(--surface2)}
   </div>
   <div class="stats-row" id="yt-stats" style="grid-template-columns:repeat(4,minmax(0,1fr))">
     <div class="stat-card"><div class="stat-label" id="sl-main">Tổng views</div><div class="stat-val" id="s-main">—</div><div class="stat-sub">mới nhất</div></div>
-    <div class="stat-card"><div class="stat-label" id="sl-avg-h">TB tăng / giờ</div><div class="stat-val" id="s-avg-h">—</div><div class="stat-sub">so với giờ trước</div></div>
+    <div class="stat-card"><div class="stat-label" id="sl-avg-h">TB tăng / giờ</div><div class="stat-val" id="s-avg-h">—</div><div class="stat-sub">so với trước</div></div>
     <div class="stat-card"><div class="stat-label" id="sl-peak">Giờ tăng cao nhất</div><div class="stat-val" id="s-peak" style="font-size:22px;padding-top:4px">—</div><div class="stat-sub" id="s-peak-sub">—</div></div>
     <div class="stat-card"><div class="stat-label" id="sl-top-video">Bài tăng cao nhất</div><div id="s-top-video" style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;line-height:1.5;margin:6px 0 4px;color:var(--text)">—</div><div class="stat-sub" id="s-top-video-sub">—</div></div>
   </div>
   <div id="yt-content"><div class="loading"><div class="spinner"></div><div class="loading-txt">Đang tải...</div></div></div>
 </div>
 
+<!-- Spotify panel -->
+<div id="panel-spotify" class="hidden">
+  <div class="controls">
+    <span class="ctrl-label">Xem theo</span>
+    <div class="btn-group" id="grp-sp-mode">
+      <button class="btn active sp-btn" onclick="setSpMode('day',this)">7 ngày</button>
+      <button class="btn sp-btn" onclick="setSpMode('month',this)">12 tháng</button>
+    </div>
+  </div>
+  <div class="stats-row" style="grid-template-columns:repeat(5,minmax(0,1fr))">
+    <div class="stat-card"><div class="stat-label">Monthly Listeners</div><div class="stat-val" id="sp-listeners" style="color:var(--spotify)">—</div><div class="stat-sub" id="sp-listeners-sub">mới nhất</div></div>
+    <div class="stat-card"><div class="stat-label">Tổng lượt nghe</div><div class="stat-val" id="sp-total">—</div><div class="stat-sub">mới nhất</div></div>
+    <div class="stat-card"><div class="stat-label">TB tăng / ngày</div><div class="stat-val" id="sp-avg">—</div><div class="stat-sub">trung bình</div></div>
+    <div class="stat-card"><div class="stat-label">Ngày tăng cao nhất</div><div class="stat-val" id="sp-peak" style="font-size:18px;padding-top:6px">—</div><div class="stat-sub" id="sp-peak-sub">—</div></div>
+    <div class="stat-card"><div class="stat-label">Bài nghe nhiều nhất</div><div id="sp-top" style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;line-height:1.5;margin:6px 0 4px;color:var(--text)">—</div><div class="stat-sub" id="sp-top-sub">—</div></div>
+  </div>
+  <div class="sp-input-hint">
+    Nhập dữ liệu vào tab <code>Spotify_Manual</code> trong Google Sheet — cột A: Ngày (dd/MM/yyyy), cột B: Tên bài, cột C: Lượt nghe, cột D: Giờ (dd/MM/yyyy HH:mm) — tuỳ chọn.
+  </div>
+  <div id="sp-content"><div class="loading"><div class="spinner"></div><div class="loading-txt">Đang tải...</div></div></div>
+</div>
+
 <script>
 const SCRIPT_URL="https://script.google.com/macros/s/AKfycbzkVClkhBSfHLs35AVvi33jHP4u_PXo-0OPC3HwkzOL8Qqibu97a74MsATTk1C3lEuH/exec";
-let ytData=[],mode="hour",metric="views";
+let ytData=[],spData=[],platform="youtube",mode="hour",metric="views",spMode="day";
 
-
-function setMode(m,btn){
-  mode=m;
-  document.querySelectorAll('#grp-mode .btn').forEach(b=>b.classList.remove('active'));
+function setPlatform(p,btn){
+  platform=p;
+  document.querySelectorAll('.ptab').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  renderYouTube();
+  document.getElementById('panel-youtube').classList.toggle('hidden',p!=='youtube');
+  document.getElementById('panel-spotify').classList.toggle('hidden',p!=='spotify');
+  if(p==='spotify') renderSpotify();
 }
-function setMetric(m,btn){
-  metric=m;
-  document.querySelectorAll('#grp-metric .btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  renderYouTube();
-}
-function setSpMode(m,btn){
-  spMode=m;
-  document.querySelectorAll('#grp-sp-mode .btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  renderSpotify();
-}
+function setMode(m,btn){mode=m;document.querySelectorAll('#grp-mode .btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderYouTube();}
+function setMetric(m,btn){metric=m;document.querySelectorAll('#grp-metric .btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderYouTube();}
+function setSpMode(m,btn){spMode=m;document.querySelectorAll('#grp-sp-mode .btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderSpotify();}
 
 function fmt(n){if(!n&&n!==0)return"—";if(n>=1e6)return(n/1e6).toFixed(2)+"M";if(n>=1e3)return(n/1e3).toFixed(1)+"K";return n.toLocaleString("vi-VN")}
 function fmtFull(n){if(n===null||n===undefined)return"—";return Number(n).toLocaleString("vi-VN")}
-function fmtDur(ms){if(!ms)return"—";const m=Math.floor(ms/60000);const s=Math.floor((ms%60000)/1000);return m+":"+String(s).padStart(2,"0")}
 function fmtDiff(n){if(!n&&n!==0)return"";if(n>0)return`<span class="up">+${fmtFull(n)}</span>`;if(n<0)return`<span class="dn">${fmtFull(n)}</span>`;return"—"}
+
 function getYTTimeKey(row){return mode==="hour"?(row.hour||row.date):row.date}
 
 function renderYouTube(){
@@ -136,38 +157,34 @@ function renderYouTube(){
   const latest=times[times.length-1];
   const videos=Object.keys(videoMap).sort((a,b)=>(videoMap[b][latest]?.views||0)-(videoMap[a][latest]?.views||0));
 
-  // Stats labels
   const metricLabel={views:"Tổng views",likes:"Tổng likes",comments:"Tổng comments"};
-  const metricKey=metric;
-  document.getElementById('sl-main').textContent=metricLabel[metricKey];
-
+  document.getElementById('sl-main').textContent=metricLabel[metric];
   let total=0;
-  videos.forEach(v=>{const c=videoMap[v][latest];if(c) total+=c[metricKey]||0;});
+  videos.forEach(v=>{const c=videoMap[v][latest];if(c) total+=c[metric]||0;});
   document.getElementById('s-main').textContent=fmt(total);
 
-  // TB tăng / giờ (hoặc ngày)
+  // TB tăng
   if(times.length>=2){
     const prev=times[times.length-2];
     let diff=0;
-    videos.forEach(v=>{diff+=(videoMap[v][latest]?.[metricKey]||0)-(videoMap[v][prev]?.[metricKey]||0);});
+    videos.forEach(v=>{diff+=(videoMap[v][latest]?.[metric]||0)-(videoMap[v][prev]?.[metric]||0);});
     const el=document.getElementById('s-avg-h');
     el.innerHTML=diff>=0?`<span class="up">+${fmt(diff)}</span>`:`<span class="dn">${fmt(diff)}</span>`;
     document.getElementById('sl-avg-h').textContent=mode==='hour'?'TB tăng / giờ':'TB tăng / ngày';
   }
 
-  // Giờ tăng cao nhất
+  // Giờ/ngày tăng cao nhất
   if(times.length>=2){
     let peakTime="",peakDiff=0;
     for(let i=1;i<times.length;i++){
       let diff=0;
-      videos.forEach(v=>{diff+=(videoMap[v][times[i]]?.[metricKey]||0)-(videoMap[v][times[i-1]]?.[metricKey]||0);});
+      videos.forEach(v=>{diff+=(videoMap[v][times[i]]?.[metric]||0)-(videoMap[v][times[i-1]]?.[metric]||0);});
       if(diff>peakDiff){peakDiff=diff;peakTime=times[i];}
     }
     if(peakTime){
       document.getElementById('s-peak').textContent=mode==='hour'?peakTime.split(" ")[1]:peakTime;
-      document.getElementById('s-peak-sub').textContent="+"+fmt(peakDiff)+" "+metricKey;
+      document.getElementById('s-peak-sub').textContent="+"+fmt(peakDiff)+" "+metric;
       document.getElementById('sl-peak').textContent=mode==='hour'?'Giờ tăng cao nhất':'Ngày tăng cao nhất';
-      document.getElementById('sl-avg-h').textContent=mode==='hour'?'TB tăng / giờ':'TB tăng / ngày';
     }
   }
 
@@ -176,17 +193,15 @@ function renderYouTube(){
     const prev=times[times.length-2];
     let topVideo="",topDiff=0;
     videos.forEach(v=>{
-      const diff=(videoMap[v][latest]?.[metricKey]||0)-(videoMap[v][prev]?.[metricKey]||0);
+      const diff=(videoMap[v][latest]?.[metric]||0)-(videoMap[v][prev]?.[metric]||0);
       if(diff>topDiff){topDiff=diff;topVideo=v;}
     });
     if(topVideo){
       const short=topVideo.replace(/CONGB\s*/i,"").replace(/\|.*/,"").trim();
       document.getElementById('s-top-video').textContent=short;
-
-      // Tính TB tăng/giờ và giờ tăng nhiều nhất của bài đó
       let peakT="",peakD=0,totalD=0,countD=0;
       for(let i=1;i<times.length;i++){
-        const d=(videoMap[topVideo][times[i]]?.[metricKey]||0)-(videoMap[topVideo][times[i-1]]?.[metricKey]||0);
+        const d=(videoMap[topVideo][times[i]]?.[metric]||0)-(videoMap[topVideo][times[i-1]]?.[metric]||0);
         if(d>0){totalD+=d;countD++;}
         if(d>peakD){peakD=d;peakT=times[i];}
       }
@@ -194,7 +209,7 @@ function renderYouTube(){
       const peakLabel=mode==='hour'?(peakT.split(" ")[1]||peakT):peakT;
       const unit=mode==='hour'?'giờ':'ngày';
       document.getElementById('s-top-video-sub').innerHTML=
-        `<span class="up">+${fmt(topDiff)}</span> ${metricKey} &nbsp;|&nbsp; TB: +${fmt(avgH)}/${unit} &nbsp;|&nbsp; Đỉnh: ${peakLabel}`;
+        `<span class="up">+${fmt(topDiff)}</span> ${metric} &nbsp;|&nbsp; TB: +${fmt(avgH)}/${unit} &nbsp;|&nbsp; Đỉnh: ${peakLabel}`;
       document.getElementById('sl-top-video').textContent='Bài tăng cao nhất';
     }
   }
@@ -209,106 +224,172 @@ function renderYouTube(){
     html+=`<th class="r" style="${isL?'color:var(--accent2)':''}">${label}</th>`;
   });
   html+=`<th class="r" style="color:var(--up)">+/-</th></tr></thead><tbody>`;
-
   videos.forEach((v,i)=>{
     const short=v.replace(/CONGB\s*/i,"").replace(/\|.*/,"").trim();
     html+=`<tr><td class="rank-col">${i+1}</td><td class="name-col" title="${v}">${short}</td>`;
     times.forEach(t=>{
       const cell=videoMap[v][t];
-      const val=cell?cell[metricKey]:null;
+      const val=cell?cell[metric]:null;
       const isL=t===latest;
       html+=val===null||val===undefined?`<td class="r val-empty">—</td>`:`<td class="r ${isL?'val-latest':'val-cell'}">${fmtFull(val)}</td>`;
     });
-    // Cột +/- (mới nhất - cũ nhất trong range)
-    const first=times[0],last=times[times.length-1];
-    const v1=videoMap[v][last]?.[metricKey]||0;
-    const v0=videoMap[v][first]?.[metricKey]||0;
-    const tLast2=times[times.length-1];
-    const tPrev2=times[times.length-2];
-    const vL=videoMap[v][tLast2]?.[metricKey]??null;
-    const vP=videoMap[v][tPrev2]?.[metricKey]??null;
-    html+=`<td class="r">${(vL!==null&&vP!==null)?fmtDiff(vL-vP):"—"}</td>`;
-    html+=`</tr>`;
+    const tL=times[times.length-1],tP=times[times.length-2];
+    const vL=videoMap[v][tL]?.[metric]??null,vP=videoMap[v][tP]?.[metric]??null;
+    html+=`<td class="r">${(vL!==null&&vP!==null)?fmtDiff(vL-vP):"—"}</td></tr>`;
   });
   html+=`</tbody></table></div>`;
   document.getElementById('yt-content').innerHTML=html;
 }
 
+// ============================================================
+//  SPOTIFY RENDER
+// ============================================================
+
 function renderSpotify(){
-  if(!spData.length){document.getElementById('sp-content').innerHTML='<div class="loading"><div class="loading-txt">Chưa có data Spotify</div></div>';return;}
-
-  const trackNames=[...new Set(spData.map(r=>r.name))];
-  const allDates=[...new Set(spData.map(r=>r.date))].sort();
-  const getKey=r=>spMode==='day'?r.date:(()=>{const p=r.date.split("/");return p[1]+"/"+p[2];})();
-  const allKeys=[...new Set(spData.map(r=>getKey(r)))].sort();
-  const keys=allKeys.slice(-7);
-  const latest=keys[keys.length-1];
-  const latestDate=allDates[allDates.length-1];
-
-  // Latest tracks
-  const latestTracks=spData.filter(r=>r.date===latestDate);
-  const trackSet=new Map();
-  latestTracks.forEach(r=>{if(!trackSet.has(r.name)) trackSet.set(r.name,r);});
-  const uniqueTracks=[...trackSet.values()];
-
-  document.getElementById('sp-tracks').textContent=uniqueTracks.length;
-  document.getElementById('sp-date').textContent=latestDate||"—";
-  if(uniqueTracks.length){
-    document.getElementById('sp-top-track').textContent=uniqueTracks[0].name;
-    document.getElementById('sp-top-track-sub').textContent=uniqueTracks[0].album||"—";
+  if(!spData.length){
+    document.getElementById('sp-content').innerHTML=
+      '<div class="loading"><div class="loading-txt">Chưa có data — hãy nhập vào tab Spotify_Manual trong Google Sheet!</div></div>';
+    document.getElementById('sp-total').textContent="—";
+    return;
   }
 
-  // Danh sách bài mới theo ngày
-  const trackByDate={};
-  spData.forEach(r=>{
+  const LISTENER_KEY="🎤 Monthly Listeners";
+
+  // Group by date or month
+  const getKey=r=>{
+    if(spMode==='day') return r.date;
+    const p=r.date.split("/");
+    return p[1]+"/"+p[2];
+  };
+
+  // Separate listeners from tracks
+  // Với chế độ tháng: lấy giá trị ngày cuối cùng trong tháng (không cộng dồn)
+  const listenerMap={};
+  const trackMap={};
+  const allKeys=new Set();
+
+  // Sort by date first để đảm bảo ngày sau ghi đè ngày trước
+  const sorted=[...spData].sort((a,b)=>a.date.split("/").reverse().join("")>b.date.split("/").reverse().join("")?1:-1);
+
+  sorted.forEach(r=>{
     const k=getKey(r);
-    if(!trackByDate[k]) trackByDate[k]=new Set();
-    trackByDate[k].add(r.name);
+    allKeys.add(k);
+    if(r.title===LISTENER_KEY){
+      // Luôn lấy giá trị mới nhất (ngày cuối cùng trong key)
+      listenerMap[k]=Number(r.plays||0);
+    } else {
+      if(!trackMap[r.title]) trackMap[r.title]={};
+      if(spMode==='day'){
+        // Theo ngày: lấy giá trị ngày đó
+        trackMap[r.title][k]=Number(r.plays||0);
+      } else {
+        // Theo tháng: lấy giá trị ngày cuối cùng trong tháng
+        trackMap[r.title][k]=Number(r.plays||0);
+      }
+    }
   });
 
+  const keys=[...allKeys].sort().slice(spMode==='day'?-7:-12);
+  const latest=keys[keys.length-1];
+  const tracks=Object.keys(trackMap).sort((a,b)=>(trackMap[b][latest]||0)-(trackMap[a][latest]||0));
+
+  // Monthly Listeners
+  const latestListeners=listenerMap[latest]||0;
+  if(latestListeners){
+    document.getElementById('sp-listeners').textContent=fmt(latestListeners);
+    // Delta listeners
+    const prevKey=keys[keys.length-2];
+    const prevListeners=listenerMap[prevKey]||0;
+    if(prevListeners){
+      const diff=latestListeners-prevListeners;
+      document.getElementById('sp-listeners-sub').innerHTML=
+        diff>=0?`<span class="up">+${fmt(diff)}</span> so với trước`:`<span class="dn">${fmt(diff)}</span> so với trước`;
+    }
+  } else {
+    document.getElementById('sp-listeners').textContent="—";
+  }
+
+  // Stats
+  let total=0;
+  tracks.forEach(t=>{total+=trackMap[t][latest]||0;});
+  document.getElementById('sp-total').textContent=fmt(total);
+
+  // TB tăng / ngày
+  if(keys.length>=2){
+    let diffs=[];
+    for(let i=1;i<keys.length;i++){
+      let d=0;
+      tracks.forEach(t=>{d+=(trackMap[t][keys[i]]||0)-(trackMap[t][keys[i-1]]||0);});
+      if(d!==0) diffs.push(d);
+    }
+    const avg=diffs.length?Math.round(diffs.reduce((a,b)=>a+b,0)/diffs.length):0;
+    const el=document.getElementById('sp-avg');
+    el.innerHTML=avg>=0?`<span class="up">+${fmt(avg)}</span>`:`<span class="dn">${fmt(avg)}</span>`;
+  }
+
+  // Ngày tăng cao nhất
+  if(keys.length>=2){
+    let peakKey="",peakDiff=0;
+    for(let i=1;i<keys.length;i++){
+      let diff=0;
+      tracks.forEach(t=>{diff+=(trackMap[t][keys[i]]||0)-(trackMap[t][keys[i-1]]||0);});
+      if(diff>peakDiff){peakDiff=diff;peakKey=keys[i];}
+    }
+    if(peakKey){
+      document.getElementById('sp-peak').textContent=peakKey;
+      document.getElementById('sp-peak-sub').textContent="+"+fmt(peakDiff)+" lượt nghe";
+    }
+  }
+
+  // Bài nghe nhiều nhất
+  if(tracks.length){
+    document.getElementById('sp-top').textContent=tracks[0];
+    document.getElementById('sp-top-sub').textContent=fmtFull(trackMap[tracks[0]][latest])+" lượt nghe";
+  }
+
+  // Table
   let html=`<div class="table-wrap"><table><thead><tr>
-    <th style="width:40px;text-align:center">#</th>
-    <th>Tên bài</th><th class="r">Album</th><th class="r">Duration</th>`;
+    <th style="width:40px;text-align:center">#</th><th>Tên bài</th>`;
   keys.forEach(k=>{
     const isL=k===latest;
-    html+=`<th class="r" style="${isL?'color:var(--spotify)':''}">Có mặt<br><span style='font-size:10px;color:#b8cfe0'>${k}</span></th>`;
+    html+=`<th class="r" style="${isL?'color:var(--spotify)':''}">${k}</th>`;
   });
-  html+=`</tr></thead><tbody>`;
-
-  uniqueTracks.forEach((t,i)=>{
-    html+=`<tr><td class="rank-col">${i+1}</td>
-      <td class="name-col">${t.name}</td>
-      <td class="r val-cell" style="max-width:140px;overflow:hidden;text-overflow:ellipsis">${t.album||"—"}</td>
-      <td class="r val-latest">${fmtDur(t.duration)}</td>`;
+  html+=`<th class="r" style="color:var(--up)">+/-</th></tr></thead><tbody>`;
+  tracks.forEach((t,i)=>{
+    html+=`<tr><td class="rank-col">${i+1}</td><td class="name-col">${t}</td>`;
     keys.forEach(k=>{
-      const has=trackByDate[k]?.has(t.name);
-      html+=`<td class="r ${k===latest?'val-latest':'val-cell'}">${has?'✓':"—"}</td>`;
+      const val=trackMap[t][k];
+      const isL=k===latest;
+      html+=val===undefined?`<td class="r val-empty">—</td>`:`<td class="r ${isL?'val-latest':'val-cell'}">${fmtFull(val)}</td>`;
     });
-    html+=`</tr>`;
+    const vL=trackMap[t][keys[keys.length-1]]??null;
+    const vP=trackMap[t][keys[keys.length-2]]??null;
+    html+=`<td class="r">${(vL!==null&&vP!==null)?fmtDiff(vL-vP):"—"}</td></tr>`;
   });
   html+=`</tbody></table></div>`;
   document.getElementById('sp-content').innerHTML=html;
 }
 
+// ============================================================
+//  FETCH DATA
+// ============================================================
+
 async function fetchWithFallback(){
-  const bust = "&t=" + Date.now();
-  const proxies = [
-    u => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}`,
-    u => `https://thingproxy.freeboard.io/fetch/${u}`,
-    u => `https://api.codetabs.com/v1/proxy?quest=${u}`,
+  const bust="&t="+Date.now();
+  const proxies=[
+    u=>`https://api.allorigins.win/get?url=${encodeURIComponent(u)}`,
+    u=>`https://thingproxy.freeboard.io/fetch/${u}`,
   ];
-  for (const mkProxy of proxies) {
-    try {
-      const res = await fetch(mkProxy(SCRIPT_URL + bust));
-      const txt = await res.text();
-      let j;
-      try { j = JSON.parse(txt); } catch(e) { continue; }
-      if (j.contents) { try { return JSON.parse(j.contents); } catch(e) { continue; } }
-      if (j.youtube) return j;
-      if (Array.isArray(j) || j.data) return j;
-    } catch(e) {}
+  for(const mkProxy of proxies){
+    try{
+      const res=await fetch(mkProxy(SCRIPT_URL+bust));
+      const txt=await res.text();
+      let j;try{j=JSON.parse(txt);}catch(e){continue;}
+      if(j.contents){try{return JSON.parse(j.contents);}catch(e){continue;}}
+      if(j.youtube) return j;
+    }catch(e){}
   }
-  try { return await (await fetch(SCRIPT_URL)).json(); } catch(e) {}
+  try{return await(await fetch(SCRIPT_URL)).json();}catch(e){}
   throw new Error("Không kết nối được API");
 }
 
@@ -316,11 +397,14 @@ async function loadData(){
   try{
     const data=await fetchWithFallback();
     ytData=data.youtube||[];
-    document.getElementById('last-update').textContent="Cập nhật: "+new Date().toLocaleTimeString("vi-VN",{hour:"2-digit",minute:"2-digit"});
+    spData=data.spotify||[];
+    document.getElementById('last-update').textContent=
+      "Cập nhật: "+new Date().toLocaleTimeString("vi-VN",{hour:"2-digit",minute:"2-digit"});
     renderYouTube();
-
+    if(platform==='spotify') renderSpotify();
   }catch(e){
-    document.getElementById('yt-content').innerHTML=`<div class="error-box">Không tải được dữ liệu.<br><small>${e.message}</small></div>`;
+    document.getElementById('yt-content').innerHTML=
+      `<div class="error-box">Không tải được dữ liệu.<br><small>${e.message}</small></div>`;
   }
 }
 
